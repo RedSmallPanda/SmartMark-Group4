@@ -33,7 +33,7 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <img src={logo} className="App-logo" alt="logo"/>
-                    <p>
+                    <p className="App-logo">
                         Edit <code>src/App.js</code> and save to reload!
                     </p>
                     <a
@@ -48,6 +48,7 @@ class App extends Component {
                         rmp send
                     </button>
                     <Link to='/home'>homepage</Link>
+                    <Link to='/content'>read content</Link>
                 </header>
             </div>
         );
