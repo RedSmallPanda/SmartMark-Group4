@@ -1,9 +1,18 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import {Link} from "react-router-dom";
-
+import {BrowserRouter, Link, Route} from "react-router-dom";
+import Cookies from "js-cookie"
+import LoginReg from "./module/loginReg/LoginReg"
+import HeaderMenu from "./module/PageHeader/HeaderMenu";
+import HomePage from "./module/HomePage";
+import Content from "./module/Content";
 class App extends Component {
+    state = {
+        isLogin: false,
+        isAdmin: false,
+        auth:"",
+    };
 
     constructor(props) {
         super(props);
@@ -12,6 +21,28 @@ class App extends Component {
         this.homePage = this.homePage.bind(this);
     }
 
+    componentWillMount() {
+        let username = Cookies.get('username');
+        let tempauth=Cookies.get('auth');
+        if (typeof(tempauth) !== "undefined" && tempauth !== ''){
+            this.setState({
+                auth:tempauth
+            })
+        }
+            if (typeof(username) !== "undefined" && username !== '') {
+            if (username === "admin") {
+                this.setState({
+                    isLogin: true,
+                    isAdmin: true
+                });
+            }
+            else {
+                this.setState({
+                    isLogin: true
+                });
+            }
+        }
+    }
     postResource() {
         let msg = window.confirm("将发送测试数据到 RMP，谨慎！");
         if (msg) {
@@ -24,13 +55,27 @@ class App extends Component {
         }
     }
 
+    handleLogin(loginState) {
+        console.log("log state:");
+        console.log(loginState);
+        this.setState(loginState);
+    }
+
+
+
     homePage(){
 
     }
 
     render() {
+        let username=Cookies.get("username");
+        const p=<p>{username}</p>
         return (
             <div className="App">
+                <HeaderMenu
+                    isLogin={this.state.isLogin}
+                    isAdmin={this.state.isAdmin}
+                    handleLogin={this.handleLogin.bind(this)}/>
                 <header className="App-header">
                     <img src={logo} className="App-logo" alt="logo"/>
                     <p className="App-logo">
@@ -47,9 +92,20 @@ class App extends Component {
                     <button onClick={this.postResource}>
                         rmp send
                     </button>
-                    <Link to='/home'>homepage</Link>
-                    <Link to='/content'>read content</Link>
+                    {
+                        p
+                    }
+                    <LoginReg isLogin={this.state.isLogin}
+                              isAdmin={this.state.isAdmin}
+                              handleLogin={this.handleLogin.bind(this)}/>
+                    {/*<Link to='/home'>homepage</Link>*/}
+                    {/*<Link to='/content'>read content</Link>*/}
                 </header>
+                <BrowserRouter>
+
+                    <Route path='/home' component={HomePage} />
+                    <Route path='/content' component={Content} />
+                </BrowserRouter>
             </div>
         );
     }

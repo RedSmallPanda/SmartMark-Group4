@@ -8,11 +8,7 @@ import HomePage from "./module/HomePage";
 import Content from "./module/Content";
 
 ReactDOM.render(
-    <BrowserRouter>
-        <Route exact path='/' component={App} />
-        <Route path='/home' component={HomePage} />
-        <Route path='/content' component={Content} />
-    </BrowserRouter>,
+   <App/>,
     document.getElementById('root')
 );
 
