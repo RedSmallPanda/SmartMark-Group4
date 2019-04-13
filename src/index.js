@@ -3,9 +3,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { BrowserRouter, Route } from 'react-router-dom';
-import HomePage from "./module/HomePage";
-import Content from "./module/Content";
 
 ReactDOM.render(
    <App/>,

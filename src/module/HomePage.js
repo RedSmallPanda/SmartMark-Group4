@@ -87,7 +87,6 @@ class HomePage extends Component {
     render() {
         return (
             <div className="HomePage">
-                <Link to='/'>back to app</Link><br/>
                 <Col span={4}/>
                 <Col span={10}/>
                 <Col span={6}>

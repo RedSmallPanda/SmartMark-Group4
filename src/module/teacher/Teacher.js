@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {Row, Col, Menu, Icon, Badge} from 'antd';
 import 'antd/dist/antd.css';
-import {Link} from "react-router-dom";
 import CheckHomework from "./CheckHomework";
 import Assignment from "./Assignment";
 
@@ -40,7 +39,6 @@ class Teacher extends Component {
         }
         return (
             <div style={{marginTop:20}}>
-                <Link to='/'>&ensp;back to app&ensp;</Link><br/><br/>
                 <Row>
                     <Col span={3}/>
                     <Col span={3}>

@@ -86,7 +86,6 @@ class SearchResult extends Component {
     render() {
         return (
             <div className="SearchResult">
-                <Link to='/'>back to app</Link><br/>
                 <Col span={4}/>
                 <Col span={16}>
                     <h2>搜索结果</h2>

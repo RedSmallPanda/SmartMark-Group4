@@ -6,7 +6,9 @@ import Cookies from "js-cookie"
 import LoginReg from "./module/loginReg/LoginReg"
 import HeaderMenu from "./module/PageHeader/HeaderMenu";
 import HomePage from "./module/HomePage";
-import Content from "./module/Content";
+import Teacher from "./module/teacher/Teacher";
+import ContentPage from "./module/ContentPage";
+import SearchResult from "./module/SearchResult";
 class App extends Component {
     state = {
         isLogin: false,
@@ -71,40 +73,21 @@ class App extends Component {
         let username=Cookies.get("username");
         const p=<p>{username}</p>
         return (
-            <div className="App">
+            <div>
                 <HeaderMenu
                     isLogin={this.state.isLogin}
                     isAdmin={this.state.isAdmin}
                     handleLogin={this.handleLogin.bind(this)}/>
-                <header className="App-header">
-                    <img src={logo} className="App-logo" alt="logo"/>
-                    <p className="App-logo">
-                        Edit <code>src/App.js</code> and save to reload!
-                    </p>
-                    <a
-                        className="App-link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Learn React
-                    </a>
-                    <button onClick={this.postResource}>
-                        rmp send
-                    </button>
-                    {
-                        p
-                    }
-                    <LoginReg isLogin={this.state.isLogin}
-                              isAdmin={this.state.isAdmin}
-                              handleLogin={this.handleLogin.bind(this)}/>
-                    {/*<Link to='/home'>homepage</Link>*/}
-                    {/*<Link to='/content'>read content</Link>*/}
-                </header>
+                <LoginReg isLogin={this.state.isLogin}
+                          isAdmin={this.state.isAdmin}
+                          handleLogin={this.handleLogin.bind(this)}/>
                 <BrowserRouter>
 
+                    <Route exact path='/' component={HomePage} />
                     <Route path='/home' component={HomePage} />
-                    <Route path='/content' component={Content} />
+                    <Route path='/content' component={ContentPage} />
+                    <Route path='/search' component={SearchResult} />
+                    <Route path='/teacher' component={Teacher} />
                 </BrowserRouter>
             </div>
         );
