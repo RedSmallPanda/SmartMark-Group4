@@ -171,16 +171,16 @@ let sentences = [
         content: "I'm SmartMark. "
     },
 ];
-let marks = [
-    {
-        bookId: 1,
-        id: 1,
-        start: 1,
-        end: 2,
-        text: "test",
-        type: null,
-    }
-];
+// let marks = [
+//     {
+//         bookId: 1,
+//         id: 1,
+//         start: 1,
+//         end: 2,
+//         text: "test",
+//         type: null,
+//     }
+// ];
 
 class Content extends Component {
 
@@ -208,7 +208,7 @@ class Content extends Component {
 
     renderContent() {
         return this.state.content.map(function (sentence) {
-            return <text className='sentence' onClick={()=>alert()}>{sentence.content}</text>
+            return <text className='sentence' onClick={() => alert(sentence.content)}>{sentence.content}</text>;
         });
     }
 
