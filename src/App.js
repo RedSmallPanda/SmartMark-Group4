@@ -1,9 +1,22 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import {Link} from "react-router-dom";
-
+import {BrowserRouter, Link, Route} from "react-router-dom";
+import Cookies from "js-cookie"
+import LoginReg from "./module/loginReg/LoginReg"
+import HeaderMenu from "./module/PageHeader/HeaderMenu";
+import HomePage from "./module/HomePage";
+import Teacher from "./module/teacher/Teacher";
+import ContentPage from "./module/ContentPage";
+import SearchResult from "./module/SearchResult";
+import MyHomework from "./module/MyHomework"
+import AdminSpace from "./module/AdminSpace"
 class App extends Component {
+    state = {
+        isLogin: false,
+        isAdmin: false,
+        auth:"",
+    };
 
     constructor(props) {
         super(props);
@@ -12,6 +25,28 @@ class App extends Component {
         this.homePage = this.homePage.bind(this);
     }
 
+    componentWillMount() {
+        let username = Cookies.get('username');
+        let tempauth=Cookies.get('auth');
+        if (typeof(tempauth) !== "undefined" && tempauth !== ''){
+            this.setState({
+                auth:tempauth
+            })
+        }
+            if (typeof(username) !== "undefined" && username !== '') {
+            if (username === "admin") {
+                this.setState({
+                    isLogin: true,
+                    isAdmin: true
+                });
+            }
+            else {
+                this.setState({
+                    isLogin: true
+                });
+            }
+        }
+    }
     postResource() {
         let msg = window.confirm("将发送测试数据到 RMP，谨慎！");
         if (msg) {
@@ -24,32 +59,40 @@ class App extends Component {
         }
     }
 
+    handleLogin(loginState) {
+        console.log("log state:");
+        console.log(loginState);
+        this.setState(loginState);
+    }
+
+
+
     homePage(){
 
     }
 
     render() {
+        let username=Cookies.get("username");
+        const p=<p>{username}</p>
         return (
-            <div className="App">
-                <header className="App-header">
-                    <img src={logo} className="App-logo" alt="logo"/>
-                    <p className="App-logo">
-                        Edit <code>src/App.js</code> and save to reload!
-                    </p>
-                    <a
-                        className="App-link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Learn React
-                    </a>
-                    <button onClick={this.postResource}>
-                        rmp send
-                    </button>
-                    <Link to='/home'>homepage</Link>
-                    <Link to='/content'>read content</Link>
-                </header>
+            <div>
+                <HeaderMenu
+                    isLogin={this.state.isLogin}
+                    isAdmin={this.state.isAdmin}
+                    handleLogin={this.handleLogin.bind(this)}/>
+                <LoginReg isLogin={this.state.isLogin}
+                          isAdmin={this.state.isAdmin}
+                          handleLogin={this.handleLogin.bind(this)}/>
+                <BrowserRouter>
+
+                    <Route exact path='/' component={HomePage} />
+                    <Route path='/home' component={HomePage} />
+                    <Route path='/content' component={ContentPage} />
+                    <Route path='/search' component={SearchResult} />
+                    <Route path='/teacher' component={Teacher} />
+                    <Route path='/homework' component={MyHomework} />
+                    <Route path='/admin' component={AdminSpace} />
+                </BrowserRouter>
             </div>
         );
     }
