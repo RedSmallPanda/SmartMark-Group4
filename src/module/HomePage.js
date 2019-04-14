@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import {Link} from "react-router-dom";
-import {Card, Row, Col, message, Divider} from 'antd';
+import {Card, Row, Col, Divider} from 'antd';
+import Button from "antd/es/button/button";
 
 const testImg = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1555149598771&di=cc9731ab518cf536911ef138782ec329&imgtype=0&src=http%3A%2F%2Fwww.kfzimg.com%2FG06%2FM00%2FD0%2FCC%2Fp4YBAFq49ZuAGMHzAAEH07dRn8A748_b.jpg";
 const { Meta } = Card;
@@ -38,15 +38,26 @@ class HomePage extends Component {
         this.handleMouseOver = this.handleMouseOver.bind(this);
         this.handleMouseOut = this.handleMouseOut.bind(this);
         this.handleClick = this.handleClick.bind(this);
+        this.callback = this.callback.bind(this);
     }
 
+    callback() {
+        if(this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
+            alert(this.xmlhttp.responseText);
+        }
+
+    }
     postResource() {
-        this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/", true);
-        this.xmlhttp.setRequestHeader("Content-Type","application/json");
-        let data = JSON.stringify({
-            "sentencecontent": "test value"
-        });
-        this.xmlhttp.send(data);
+        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/?Sentence.content=(like)est", true);
+        // this.xmlhttp.open("GET", "http://www.baidu.com", true);
+        // this.xmlhttp.setRequestHeader("Content-Type","application/json");
+        // let data = JSON.stringify({
+        //     "content": "test",
+        // });
+        this.xmlhttp.onreadystatechange = this.callback;
+        this.xmlhttp.send();
+
+        // this.xmlhttp.send(data);
     }
 
     handleMouseOver(id) {
@@ -95,6 +106,7 @@ class HomePage extends Component {
                 </Col>
                 <Col span={4}/>
                 <Divider/>
+                <Button type={"primary"} onClick={this.postResource}>Dangerous button</Button>
             </div>
         );
     }
