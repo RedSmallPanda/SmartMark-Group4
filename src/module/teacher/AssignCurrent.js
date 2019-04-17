@@ -1,35 +1,43 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {message, Table, Divider, Tag, Popover} from "antd";
+import moment from "moment";
 
 const columns = [{
     title: '阅读书目',
-    dataIndex: 'book',
-    key: 'book',
+    dataIndex: 'bookid',
+    key: 'bookid',
+    render: book => (<span>{book["title"]}</span>)
 }, {
     title: '发布时间',
-    dataIndex: 'start',
-    key: 'start',
+    dataIndex: 'time',
+    key: 'time',
+    render: time => (
+        <span>{moment(time, "YYYY-MM-DD HH:mm:ss").format("YYYY/MM/DD HH:mm:ss")}</span>
+    ),
 }, {
     title: '截止时间',
-    dataIndex: 'end',
-    key: 'end',
+    dataIndex: 'deadline',
+    key: 'deadline',
+    render: time => (
+        <span>{moment(time).format("YYYY/MM/DD HH:mm:ss")}</span>
+    ),
 }, {
     title: '班级',
-    key: 'classes',
-    dataIndex: 'classes',
-    render: classes => (
+    key: 'classid',
+    dataIndex: 'classid',
+    render: classid => (
         <span>
-      {classes.map(tag => {
-          return <Tag key={tag}>{tag.toUpperCase()}</Tag>;
+      {classid.map(tag => {
+          return <Tag key={tag}>{tag["name"]}</Tag>;
       })}
     </span>
     ),
 }, {
-    title: 'Action',
+    title: '操作',
     key: 'action',
     render: (text, record) => (
         <span>
-      <Popover placement="bottomRight" title={"作业要求"} content={record.requirement} trigger="click">
+      <Popover placement="bottomRight" title={"作业要求"} content={record.description} trigger="click">
         <a>Detail</a>
       </Popover>
       <Divider type="vertical"/>
@@ -38,35 +46,42 @@ const columns = [{
     ),
 }];
 
-const data = [{
-    id: 1,
-    book: 'Alice',
-    start: '2019/04/12',
-    end: '2019/04/14',
-    classes: ['F1603701', 'F1603702'],
-    requirement: '没什么特别要求'
-}, ];
-
 class AssignCurrent extends Component {
 
     constructor(props) {
         super(props);
         this.xmlhttp = new XMLHttpRequest();
+        this.state = {
+            loading: true,
+            data: []
+        };
+        this.getResource = this.getResource.bind(this);
+        this.getCallback = this.getCallback.bind(this);
+    }
+
+    componentDidMount() {
+        this.getResource();
+    }
+
+    getCallback() {
+        if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
+            this.setState({
+                loading: false,
+                data: JSON.parse(this.xmlhttp.responseText)["Homework"]
+            })
+        }
     }
 
     getResource() {
-        let msg = window.confirm("将发送测试数据到 RMP，谨慎！");
-        if (msg) {
-            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/", true);
-            this.xmlhttp.send();
-            message.info(this.xmlhttp.responseText);
-        }
+        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark2/Homework/", true);
+        this.xmlhttp.onreadystatechange = this.getCallback;
+        this.xmlhttp.send();
     }
 
     render() {
         return (
             <div>
-                <Table columns={columns} dataSource={data} />
+                <Table loading={this.state.loading} columns={columns} dataSource={this.state.data}/>
             </div>
         );
     }

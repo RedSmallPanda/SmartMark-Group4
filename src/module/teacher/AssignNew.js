@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import 'antd/dist/antd.css';
-import {Steps, Button, message, Select, Input, DatePicker, Row, Col} from 'antd';
+import {Steps, Button, message, Select, Input, DatePicker} from 'antd';
 import Content from "../Content";
+import ClassPicker from "../ClassPicker";
 
 const Step = Steps.Step;
 const Option = Select.Option;
@@ -20,49 +21,59 @@ const steps = [{
     title: '确认发布',
     description: 'Publish',
 }];
-const classes = [{
-    id: 1,
-    name: 'F1603701'
-}, {
-    id: 2,
-    name: 'F1603702'
-}, {
-    id: 3,
-    name: 'F1603703'
-}];
-const books = [{
-    id: 1,
-    title: 'C++ Primer Plus(第6版)'
-}, {
-    id: 2,
-    title: 'Java核心技术 卷I'
-}];
 
 class AssignNew extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             current: 0,
             classes: [],
-            book: [],
+            books: [],
+            classid: [],
+            bookid: [],
             deadline: null,
-            requirement: "",
+            description: "",
         };
         this.xmlhttp = new XMLHttpRequest();
+        this.getBooks = this.getBooks.bind(this);
         this.next = this.next.bind(this);
         this.prev = this.prev.bind(this);
+        this.handleCallback = this.handleCallback.bind(this);
         this.postHomework = this.postHomework.bind(this);
         this.renderStep = this.renderStep.bind(this);
         this.handleClass = this.handleClass.bind(this);
         this.handleBook = this.handleBook.bind(this);
         this.handleDeadline = this.handleDeadline.bind(this);
-        this.handleRequirement = this.handleRequirement.bind(this);
+        this.handleDescription = this.handleDescription.bind(this);
+    }
+
+    componentDidMount() {
+        this.getBooks();
+    }
+
+    getBooks() {
+        let request = new XMLHttpRequest();
+        request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark2/Book/");
+        request.onreadystatechange = () => {
+            if (request.readyState === 4 && request.status === 200) {
+                let bookList = JSON.parse(request.responseText);
+                if (bookList.hasOwnProperty("Book")) {
+                    this.setState({
+                        books: bookList["Book"],
+                    });
+                }
+            } else if (this.xmlhttp.readyState === 4) {
+                message.error('get book Failure.', 5);
+            }
+        };
+        request.send();
     }
 
     next() {
-        if (this.state.current === 0 && this.state.classes.length === 0) {
+        if (this.state.current === 0 && this.state.classid.length === 0) {
             message.warning("请先选择班级！");
-        } else if (this.state.current === 1 && this.state.book.length === 0) {
+        } else if (this.state.current === 1 && this.state.bookid.length === 0) {
             message.warning("请选择书籍！");
         } else if (this.state.current === 2 && this.state.deadline === null) {
             message.warning("请选择截止时间！");
@@ -77,24 +88,40 @@ class AssignNew extends Component {
         this.setState({current: prev});
     }
 
-    postHomework() {
-        let msg = window.confirm("暂时不会将发送测试数据到 RMP，放心点！");
-        if (msg) {
-            // this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/", true);
-            // this.xmlhttp.setRequestHeader("Content-Type", "application/json");
-            let data = JSON.stringify({
-                classes: this.state.classes,
-                book: this.state.book,
-                deadline: this.state.deadline,
-                requirement: this.state.requirement,
-            });
-            alert(data);
-            // this.xmlhttp.send(data);
+    handleCallback() {
+        if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
+            message.destroy();
+            message.success('Processing complete!', 1);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else if (this.xmlhttp.readyState === 4) {
+            message.destroy();
+            message.error('Failure.', 5);
         }
-        message.success('Processing complete!');
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+    }
+
+    postHomework() {
+        let msg = window.confirm("确认布置？");
+        if (msg) {
+            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark2/Homework/", true);
+            this.xmlhttp.setRequestHeader("Content-Type", "application/json");
+            let classes = [];
+            this.state.classid.map(classId => {
+                classes.push({id: classId})
+            });
+            let data = JSON.stringify({
+                classid: classes,
+                bookid: {id: this.state.bookid},
+                deadline: this.state.deadline,
+                description: this.state.description,
+                time: moment()
+            });
+            this.xmlhttp.onreadystatechange = this.handleCallback;
+            // this.xmlhttp.send(data);
+            alert(data);
+            message.loading('Processing ...', 0);
+        }
     }
 
     renderActions() {
@@ -117,50 +144,39 @@ class AssignNew extends Component {
     }
 
     handleClass(value) {
-        this.setState({classes: value});
+        this.setState({classid: value});
     }
 
     handleBook(value) {
-        this.setState({book: value});
+        this.setState({bookid: value});
     }
 
     handleDeadline(value) {
         this.setState({deadline: value});
     }
 
-    handleRequirement(e) {
+    handleDescription(e) {
         const {value} = e.target;
-        this.setState({requirement: value});
-    }
-
-    renderClassOptions() {
-        return classes.map(item => <Option value={item.id}>{item.name}</Option>);
+        this.setState({description: value});
     }
 
     renderBookOptions() {
-        return books.map(item => <Option value={item.id}>{item.title}</Option>);
+        return this.state.books.map(item => <Option value={item.id}>{item.title}</Option>);
     }
 
     renderStep() {
         switch (this.state.current) {
             case 0:
-                return (
-                    <div>
-                        <Select value={this.state.classes} onChange={this.handleClass} mode="multiple"
-                                style={{width: 400, marginRight: 10}} placeholder={"选择班级"} allowClear>
-                            {this.renderClassOptions()}
-                        </Select>
-                    </div>
-                );
+                return <ClassPicker value={this.state.classid} onChange={this.handleClass} mode="multiple"/>;
             case 1:
                 return (
                     <div>
                         <Select placeholder="选择书籍" className={"BookSelect"}
-                                value={this.state.book} onChange={this.handleBook}
+                                value={this.state.bookid} onChange={this.handleBook}
                                 style={{width: 400, marginBottom: 10}}>
                             {this.renderBookOptions()}
                         </Select>
-                        {this.state.book.length !== 0 && <Content/>}
+                        {this.state.bookid.length !== 0 && <Content/>}
                     </div>
                 );
             case 2:
@@ -171,27 +187,27 @@ class AssignNew extends Component {
                                          showTime={{defaultValue: moment('00:00:00', 'HH:mm:ss')}}/>
                         <br/><br/>
                         <span style={{verticalAlign: 'top'}}>补充信息：</span>
-                        <TextArea value={this.state.requirement} placeholder={"补充作业信息"}
+                        <TextArea value={this.state.description} placeholder={"补充作业信息"}
                                   style={{width: 400}} autosize={{minRows: 2, maxRows: 10}}
-                                  onChange={this.handleRequirement}/>
+                                  onChange={this.handleDescription}/>
                     </div>
                 );
             case 3:
                 return (
                     <div>
                         班级：
-                        <Select value={this.state.classes} mode="multiple" disabled
+                        <Select value={this.state.classid} mode="multiple" disabled
                                 style={{width: 400, marginRight: 10}}>
                             {this.renderClassOptions()}
                         </Select><br/><br/>
                         书籍：
-                        <Select value={this.state.book} style={{width: 400, marginRight: 10}} disabled>
+                        <Select value={this.state.bookid} style={{width: 400, marginRight: 10}} disabled>
                             {this.renderBookOptions()}
                         </Select><br/><br/>
                         截止时间：
                         <DatePicker format="YYYY-MM-DD HH:mm:ss" value={this.state.deadline} disabled/><br/><br/>
                         <span style={{verticalAlign: 'top'}}>补充信息：</span>
-                        <TextArea value={this.state.requirement} autosize={{minRows: 2, maxRows: 10}}
+                        <TextArea value={this.state.description} autosize={{minRows: 2, maxRows: 10}}
                                   style={{width: 400, marginRight: 10}} disabled/>
                     </div>
                 );
