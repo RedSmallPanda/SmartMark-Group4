@@ -2,50 +2,6 @@ import React, {Component} from 'react';
 import {message, Table, Divider, Tag, Popover} from "antd";
 import moment from "moment";
 
-const columns = [{
-    title: '阅读书目',
-    dataIndex: 'bookid',
-    key: 'bookid',
-    render: book => (<span>{book["title"]}</span>)
-}, {
-    title: '发布时间',
-    dataIndex: 'time',
-    key: 'time',
-    render: time => (
-        <span>{moment(time, "YYYY-MM-DD HH:mm:ss").format("YYYY/MM/DD HH:mm:ss")}</span>
-    ),
-}, {
-    title: '截止时间',
-    dataIndex: 'deadline',
-    key: 'deadline',
-    render: time => (
-        <span>{moment(time).format("YYYY/MM/DD HH:mm:ss")}</span>
-    ),
-}, {
-    title: '班级',
-    key: 'classid',
-    dataIndex: 'classid',
-    render: classid => (
-        <span>
-      {classid.map(tag => {
-          return <Tag key={tag}>{tag["name"]}</Tag>;
-      })}
-    </span>
-    ),
-}, {
-    title: '操作',
-    key: 'action',
-    render: (text, record) => (
-        <span>
-      <Popover placement="bottomRight" title={"作业要求"} content={record.description} trigger="click">
-        <a>Detail</a>
-      </Popover>
-      <Divider type="vertical"/>
-      <a>Delete</a>
-    </span>
-    ),
-}];
-
 class AssignCurrent extends Component {
 
     constructor(props) {
@@ -73,7 +29,10 @@ class AssignCurrent extends Component {
     }
 
     getResource() {
-        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark2/Homework/", true);
+        // this.xmlhttp.open("GET",
+        //     "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/?Homework.deadline=(gt)" + moment().toJSON(), true);
+        this.xmlhttp.open("GET",
+            "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/", true);
         this.xmlhttp.onreadystatechange = this.getCallback;
         this.xmlhttp.send();
     }
@@ -81,10 +40,54 @@ class AssignCurrent extends Component {
     render() {
         return (
             <div>
-                <Table loading={this.state.loading} columns={columns} dataSource={this.state.data}/>
+                <Table loading={this.state.loading} columns={this.columns} dataSource={this.state.data}/>
             </div>
         );
     }
+
+    columns = [{
+        title: '阅读书目',
+        dataIndex: 'bookid',
+        key: 'bookid',
+        render: book => (<span>{book["title"]}</span>)
+    }, {
+        title: '发布时间',
+        dataIndex: 'time',
+        key: 'time',
+        render: time => (
+            <span>{moment(time, "YYYY-MM-DD HH:mm:ss").format("YYYY/MM/DD HH:mm:ss")}</span>
+        ),
+    }, {
+        title: '截止时间',
+        dataIndex: 'deadline',
+        key: 'deadline',
+        render: time => (
+            <span>{moment(time).format("YYYY/MM/DD HH:mm:ss")}</span>
+        ),
+    }, {
+        title: '班级',
+        key: 'classid',
+        dataIndex: 'classid',
+        render: classid => (
+            <span>
+      {classid.map(tag => {
+          return <Tag key={tag}>{tag["name"]}</Tag>;
+      })}
+    </span>
+        ),
+    }, {
+        title: '操作',
+        key: 'action',
+        render: (text, record) => (
+            <span>
+      <Popover placement="bottomRight" title={"作业要求"} content={record.description} trigger="click">
+        <a>Detail</a>
+      </Popover>
+      <Divider type="vertical"/>
+      <a>Delete</a>
+    </span>
+        ),
+    }];
 }
 
 export default AssignCurrent;

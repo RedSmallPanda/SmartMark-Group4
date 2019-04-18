@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {Row, Col, Menu, Icon, Badge} from 'antd';
 import 'antd/dist/antd.css';
 import CheckHomework from "./CheckHomework";
 import Assignment from "./Assignment";
+import TeacherStudents from "./TeacherStudents";
 
 const SubMenu = Menu.SubMenu;
 
@@ -19,9 +20,9 @@ class Teacher extends Component {
         this.setState(this.props.location.state);
     };
 
-    handleClick = (e) =>{
+    handleClick = (e) => {
         this.setState({
-            SelectedKeys:e.key
+            SelectedKeys: e.key
         });
     };
 
@@ -35,10 +36,10 @@ class Teacher extends Component {
                 component = <CheckHomework/>;
                 break;
             default:
-                component = "error";
+                component = <TeacherStudents/>;
         }
         return (
-            <div style={{marginTop:20}}>
+            <div style={{marginTop: 20}}>
                 <Row>
                     <Col span={3}/>
                     <Col span={3}>
@@ -52,12 +53,12 @@ class Teacher extends Component {
                                 style={{height: 500}}
                             >
                                 <SubMenu key="sub1"
-                                         title={<span><Icon type="form" />作业管理</span>}>
+                                         title={<span><Icon type="form"/>作业管理</span>}>
                                     <Menu.Item key='1'><Badge count={0} dot>布置作业</Badge></Menu.Item>
                                     <Menu.Item key='2'><Badge count={1} dot>批阅作业</Badge></Menu.Item>
                                 </SubMenu>
                                 <SubMenu key="sub2"
-                                         title={<span><Icon type="ordered-list" />班级管理</span>}>
+                                         title={<span><Icon type="ordered-list"/>班级管理</span>}>
                                     <Menu.Item key='3'>学生管理</Menu.Item>
                                 </SubMenu>
                             </Menu>

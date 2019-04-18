@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {Tabs, message, Select, Divider, Input, Switch, InputNumber, Button} from 'antd';
 import 'antd/dist/antd.css';
 import Content from "../Content";
@@ -12,25 +12,17 @@ class CheckHomework extends Component {
 
     constructor(props) {
         super(props);
-        this.requestClass = new XMLHttpRequest();
-        this.requestStudent = new XMLHttpRequest();
-        this.requestHomework = new XMLHttpRequest();
         this.state = {
             students: [],
-            classes: [],
             homeworks: [],
-            classId: [],
-            homeworkId: null,
-            studentId: null,
+            classId: undefined,
+            homeworkId: undefined,
+            studentId: undefined,
             comment: '',
             score: null,
             toDisplay: false,
         };
-        this.classCallback = this.classCallback.bind(this);
-        this.getClasses = this.getClasses.bind(this);
-        this.studentCallback = this.studentCallback.bind(this);
         this.getStudents = this.getStudents.bind(this);
-        this.homeworkCallback = this.homeworkCallback.bind(this);
         this.getHomework = this.getHomework.bind(this);
 
         this.handleClass = this.handleClass.bind(this);
@@ -43,54 +35,46 @@ class CheckHomework extends Component {
         this.renderFilter = this.renderFilter.bind(this);
     }
 
-    componentDidMount() {
-        this.getClasses();
-    }
-
-    classCallback() {
-        if (this.requestClass.readyState === 4 && this.requestClass.status === 200) {
-            this.setState({
-                classes: JSON.parse(this.requestClass.responseText)["Class"]
-            });
+    getStudents(classid) {
+        if (classid === undefined || classid === '') {
+            message.error("check get students url", 0);
+        } else {
+            let request = new XMLHttpRequest();
+            request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/" +
+                "?User.auth=student&User.classid.id=" + classid, true);
+            request.onreadystatechange = () => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let studentList = JSON.parse(request.responseText);
+                    if (studentList.hasOwnProperty("User")) {
+                        this.setState({students: studentList["User"]});
+                    }
+                } else if (request.readyState === 4) {
+                    message.error('get students Failure.', 8);
+                }
+            };
+            request.send();
         }
     }
 
-    getClasses() {
-        this.requestClass.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Class/", true);
-        this.requestClass.onreadystatechange = this.classCallback;
-        this.requestClass.send();
-    }
-
-    studentCallback() {
-        if (this.requestStudent.readyState === 4 && this.requestStudent.status === 200) {
-            this.setState({
-                students: JSON.parse(this.requestStudent.responseText)["User"]
-            });
+    getHomework(classid) {
+        if (classid === undefined || classid === '') {
+            message.error("check get homeworks url", 0);
+        } else {
+            let request = new XMLHttpRequest();
+            request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/" +
+                "?Homework.classid.id=" + classid, true);
+            request.onreadystatechange = () => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let homeworkList = JSON.parse(request.responseText);
+                    if (homeworkList.hasOwnProperty("Homework")) {
+                        this.setState({homeworks: homeworkList["Homework"]});
+                    }
+                } else if (request.readyState === 4) {
+                    message.error('get homeworks Failure.', 8);
+                }
+            };
+            request.send();
         }
-    }
-
-    getStudents() {
-        message.info("todo: handle class in check homework");
-        // this.requestStudent.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/User/" +
-        //     "?User.auth=student&User.classid.id=" + this.state.classId, true);
-        // this.requestStudent.onreadystatechange = this.studentCallback;
-        // this.requestStudent.send();
-    }
-
-    homeworkCallback() {
-        if (this.requestHomework.readyState === 4 && this.requestHomework.status === 200) {
-            this.setState({
-                homeworks: JSON.parse(this.requestHomework.responseText)["Homework"]
-            });
-        }
-    }
-
-    getHomework() {
-        message.info("todo: handle class in check homework");
-        // this.requestHomework.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Homework/" +
-        //     "?Homework.classid.id=" + this.state.classId, true);
-        // this.requestHomework.onreadystatechange = this.homeworkCallback;
-        // this.requestHomework.send();
     }
 
     postScore() {
@@ -109,9 +93,16 @@ class CheckHomework extends Component {
 
     handleClass(value) {
         this.setState({classId: value});
-        if (value !== null && value !== '') {
-            this.getStudents();
-            this.getHomework();
+        if (value !== undefined) {
+            this.getStudents(value);
+            this.getHomework(value);
+        } else {
+            this.setState({
+                students: [],
+                homeworks: [],
+                homeworkId: undefined,
+                studentId: undefined,
+            });
         }
     }
 
@@ -136,33 +127,32 @@ class CheckHomework extends Component {
         this.setState({toDisplay: display});
     }
 
-    renderClassOptions() {
-        return this.state.classes.map(item => <Option value={item.id}>{item.name}</Option>);
-    }
-
     renderStudentOptions() {
-        return this.state.students.map(item => <Option value={item.id}>{item.username}</Option>);
+        return this.state.students.map(item => <Option key={item.id} value={item.id}>{item.username}</Option>);
     }
 
     renderHomeworkOptions() {
-        return this.state.homeworks.map(item => <Option value={item.id}>{item.bookid.title}</Option>);
+        return this.state.homeworks.map(item => <Option key={item.id} value={item.id}>{item.bookid.title}</Option>);
     }
 
     renderFilter() {
         return (
             <div>
-                <ClassPicker onChange={this.handleClass} value={this.state.classId} style={{width: 120, marginRight: 10}}/>
-                <Select placeholder="选择学生" onChange={this.handleStudent}
-                        style={{width: 120, marginRight: 10}}>
+                <ClassPicker onChange={this.handleClass} value={this.state.classId}
+                             style={{width: 140, marginRight: 10}}/>
+                <Select placeholder="选择学生" onChange={this.handleStudent} value={this.state.studentId}
+                        style={{width: 140, marginRight: 10}} allowClear>
                     {this.renderStudentOptions()}
                 </Select>
-                <Select placeholder="选择作业" onChange={this.handleHomework}
-                        style={{width: 300, marginRight: 10}}>
+                <Select placeholder="选择作业" onChange={this.handleHomework} value={this.state.homeworkId}
+                        style={{width: 400, marginRight: 10}} allowClear>
                     {this.renderHomeworkOptions()}
                 </Select>
                 <br/><br/>
                 {
-                    this.state.classId == null || this.state.studentId == null || this.state.homeworkId == null ?
+                    this.state.classId === null || this.state.classId === undefined ||
+                    this.state.studentId === null || this.state.studentId === undefined ||
+                    this.state.homeworkId === null || this.state.homeworkId === undefined ?
                         null
                         :
                         <div>

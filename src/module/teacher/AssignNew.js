@@ -1,13 +1,15 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import moment from 'moment';
 import 'antd/dist/antd.css';
-import {Steps, Button, message, Select, Input, DatePicker} from 'antd';
+import {Steps, Button, message, Input, DatePicker} from 'antd';
 import Content from "../Content";
 import ClassPicker from "../ClassPicker";
+import BookPicker from "./BookPicker";
+import Popconfirm from "antd/es/popconfirm";
+import Icon from "antd/es/icon";
 
 const Step = Steps.Step;
-const Option = Select.Option;
-const { TextArea } = Input;
+const {TextArea} = Input;
 const steps = [{
     title: '选择班级',
     description: 'Classes',
@@ -28,15 +30,13 @@ class AssignNew extends Component {
         super(props);
         this.state = {
             current: 0,
-            classes: [],
-            books: [],
             classid: [],
             bookid: [],
             deadline: null,
             description: "",
         };
         this.xmlhttp = new XMLHttpRequest();
-        this.getBooks = this.getBooks.bind(this);
+        this.clear = this.clear.bind(this);
         this.next = this.next.bind(this);
         this.prev = this.prev.bind(this);
         this.handleCallback = this.handleCallback.bind(this);
@@ -48,26 +48,14 @@ class AssignNew extends Component {
         this.handleDescription = this.handleDescription.bind(this);
     }
 
-    componentDidMount() {
-        this.getBooks();
-    }
-
-    getBooks() {
-        let request = new XMLHttpRequest();
-        request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark2/Book/");
-        request.onreadystatechange = () => {
-            if (request.readyState === 4 && request.status === 200) {
-                let bookList = JSON.parse(request.responseText);
-                if (bookList.hasOwnProperty("Book")) {
-                    this.setState({
-                        books: bookList["Book"],
-                    });
-                }
-            } else if (this.xmlhttp.readyState === 4) {
-                message.error('get book Failure.', 5);
-            }
-        };
-        request.send();
+    clear() {
+        this.setState({
+            current: 0,
+            classid: [],
+            bookid: [],
+            deadline: null,
+            description: "",
+        });
     }
 
     next() {
@@ -104,7 +92,7 @@ class AssignNew extends Component {
     postHomework() {
         let msg = window.confirm("确认布置？");
         if (msg) {
-            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark2/Homework/", true);
+            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/", true);
             this.xmlhttp.setRequestHeader("Content-Type", "application/json");
             let classes = [];
             this.state.classid.map(classId => {
@@ -118,8 +106,7 @@ class AssignNew extends Component {
                 time: moment()
             });
             this.xmlhttp.onreadystatechange = this.handleCallback;
-            // this.xmlhttp.send(data);
-            alert(data);
+            this.xmlhttp.send(data);
             message.loading('Processing ...', 0);
         }
     }
@@ -127,13 +114,16 @@ class AssignNew extends Component {
     renderActions() {
         return (
             <div className="steps-action" align="right">
+                <Popconfirm title={"确认清空？"} onConfirm={this.clear}>
+                    <Button type="danger" style={{marginRight: 8}}>CLEAR</Button>
+                </Popconfirm>
                 {
                     this.state.current > 0 &&
-                    <Button style={{marginRight: 8}} onClick={this.prev}>Previous</Button>
+                    <Button style={{marginRight: 8}} onClick={this.prev}><Icon type="left"/>Previous</Button>
                 }
                 {
                     this.state.current < steps.length - 1
-                    && <Button type="primary" onClick={() => this.next()}>Next</Button>
+                    && <Button type="primary" onClick={() => this.next()}>Next<Icon type="right"/></Button>
                 }
                 {
                     this.state.current === steps.length - 1 &&
@@ -148,7 +138,7 @@ class AssignNew extends Component {
     }
 
     handleBook(value) {
-        this.setState({bookid: value});
+        this.setState({bookid: value === undefined ? [] : value});
     }
 
     handleDeadline(value) {
@@ -160,22 +150,14 @@ class AssignNew extends Component {
         this.setState({description: value});
     }
 
-    renderBookOptions() {
-        return this.state.books.map(item => <Option value={item.id}>{item.title}</Option>);
-    }
-
     renderStep() {
         switch (this.state.current) {
             case 0:
-                return <ClassPicker value={this.state.classid} onChange={this.handleClass} mode="multiple"/>;
+                return <ClassPicker value={this.state.classid} onChange={this.handleClass} mode="multiple" allowClear/>;
             case 1:
                 return (
                     <div>
-                        <Select placeholder="选择书籍" className={"BookSelect"}
-                                value={this.state.bookid} onChange={this.handleBook}
-                                style={{width: 400, marginBottom: 10}}>
-                            {this.renderBookOptions()}
-                        </Select>
+                        <BookPicker value={this.state.bookid} onChange={this.handleBook} allowClear/>
                         {this.state.bookid.length !== 0 && <Content/>}
                     </div>
                 );
@@ -195,15 +177,8 @@ class AssignNew extends Component {
             case 3:
                 return (
                     <div>
-                        班级：
-                        <Select value={this.state.classid} mode="multiple" disabled
-                                style={{width: 400, marginRight: 10}}>
-                            {this.renderClassOptions()}
-                        </Select><br/><br/>
-                        书籍：
-                        <Select value={this.state.bookid} style={{width: 400, marginRight: 10}} disabled>
-                            {this.renderBookOptions()}
-                        </Select><br/><br/>
+                        班级：<ClassPicker value={this.state.classid} mode="multiple" disabled/><br/><br/>
+                        书籍：<BookPicker value={this.state.bookid} disabled/><br/><br/>
                         截止时间：
                         <DatePicker format="YYYY-MM-DD HH:mm:ss" value={this.state.deadline} disabled/><br/><br/>
                         <span style={{verticalAlign: 'top'}}>补充信息：</span>
@@ -233,4 +208,3 @@ class AssignNew extends Component {
 }
 
 export default AssignNew;
-
