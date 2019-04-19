@@ -1,12 +1,10 @@
 import React, {Component} from 'react';
 import moment from 'moment';
 import 'antd/dist/antd.css';
-import {Steps, Button, message, Input, DatePicker} from 'antd';
+import {Steps, Button, message, Input, DatePicker, Popconfirm, Icon} from 'antd';
 import Content from "../Content";
 import ClassPicker from "../ClassPicker";
 import BookPicker from "./BookPicker";
-import Popconfirm from "antd/es/popconfirm";
-import Icon from "antd/es/icon";
 
 const Step = Steps.Step;
 const {TextArea} = Input;
@@ -36,16 +34,20 @@ class AssignNew extends Component {
             description: "",
         };
         this.xmlhttp = new XMLHttpRequest();
+        this.recursiveXMLHttp = new XMLHttpRequest();
         this.clear = this.clear.bind(this);
         this.next = this.next.bind(this);
         this.prev = this.prev.bind(this);
-        this.handleCallback = this.handleCallback.bind(this);
         this.postHomework = this.postHomework.bind(this);
-        this.renderStep = this.renderStep.bind(this);
+        this.homeworkCallback = this.homeworkCallback.bind(this);
+        this.assignByClass = this.assignByClass.bind(this);
+        this.recursiveInitializeGrade = this.recursiveInitializeGrade.bind(this);
+
         this.handleClass = this.handleClass.bind(this);
         this.handleBook = this.handleBook.bind(this);
         this.handleDeadline = this.handleDeadline.bind(this);
         this.handleDescription = this.handleDescription.bind(this);
+        this.renderStep = this.renderStep.bind(this);
     }
 
     clear() {
@@ -76,16 +78,76 @@ class AssignNew extends Component {
         this.setState({current: prev});
     }
 
-    handleCallback() {
+    recursiveInitializeGrade(homeworkId) {
+        if (this.studentCount < this.users.length) {
+            this.recursiveXMLHttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Grade/", true);
+            this.recursiveXMLHttp.setRequestHeader("Content-Type", "application/json");
+            let data = JSON.stringify({
+                userid: {id: this.users[this.studentCount].id},
+                homeworkid: {id: homeworkId},
+                comment: '教师暂未批改',
+                score: -1
+            });
+            this.recursiveXMLHttp.onreadystatechange = () => {
+                if (this.recursiveXMLHttp.readyState === 4 && this.recursiveXMLHttp.status === 200) {
+                    this.studentCount += 1;
+                    this.recursiveInitializeGrade(homeworkId);
+                }
+            };
+            this.recursiveXMLHttp.send(data);
+        } else {
+            if (this.studentCount === this.users.length) {
+                this.classCount += 1;
+                message.success("Processed: Class " + this.classCount, 0);
+                this.assignByClass(homeworkId);
+            }
+        }
+    }
+
+    assignByClass(homeworkId) {
+        if (this.classCount < this.state.classid.length) {
+            message.loading("Processing Class " + (this.classCount + 1), 0);
+            let classId = this.state.classid[this.classCount];
+            let request = new XMLHttpRequest();
+            request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/" +
+                "?User.auth=student&User.classid.id=" + classId, true);
+            request.onreadystatechange = () => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let studentList = JSON.parse(request.responseText);
+                    if (studentList.hasOwnProperty("User")) {
+                        this.users = studentList["User"];
+                        this.studentCount = 0;
+                        message.loading("Initializing Grades...", 0);
+                        this.recursiveInitializeGrade(homeworkId);
+                    }
+                } else if (request.readyState === 4) {
+                    message.error('Failure: get student when adding grade', 0);
+                }
+            };
+            request.send();
+        } else {
+            if (this.classCount === this.state.classid.length) {
+                message.success("All processed !!!", 0);
+                message.info("You can refresh the page now", 0);
+                // message.destroy();
+                // message.success('Processing complete!', 1);
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 1000);
+            }
+        }
+    }
+
+    homeworkCallback() {
         if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
-            message.destroy();
-            message.success('Processing complete!', 1);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            message.success('Homework Processed.', 0);
+
+            let homeworkId = JSON.parse(this.xmlhttp.responseText)["id"];
+            this.classCount = 0;
+            this.assignByClass(homeworkId);
+
         } else if (this.xmlhttp.readyState === 4) {
-            message.destroy();
-            message.error('Failure.', 5);
+            message.error('Homework Failure.', 0);
         }
     }
 
@@ -105,9 +167,9 @@ class AssignNew extends Component {
                 description: this.state.description,
                 time: moment()
             });
-            this.xmlhttp.onreadystatechange = this.handleCallback;
+            this.xmlhttp.onreadystatechange = this.homeworkCallback;
             this.xmlhttp.send(data);
-            message.loading('Processing ...', 0);
+            message.loading('Processing homework...', 0);
         }
     }
 
@@ -164,9 +226,10 @@ class AssignNew extends Component {
             case 2:
                 return (
                     <div>
-                        截止时间：<DatePicker style={{marginBottom: 10}} format="YYYY-MM-DD HH:mm:ss"
-                                         value={this.state.deadline} onChange={this.handleDeadline}
-                                         showTime={{defaultValue: moment('00:00:00', 'HH:mm:ss')}}/>
+                        截止时间：
+                        <DatePicker style={{marginBottom: 10}} format="YYYY-MM-DD HH:mm:ss"
+                                    value={this.state.deadline} onChange={this.handleDeadline}
+                                    showTime={{defaultValue: moment('00:00:00', 'HH:mm:ss')}}/>
                         <br/><br/>
                         <span style={{verticalAlign: 'top'}}>补充信息：</span>
                         <TextArea value={this.state.description} placeholder={"补充作业信息"}
