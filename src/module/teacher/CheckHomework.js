@@ -18,12 +18,12 @@ class CheckHomework extends Component {
             classId: undefined,
             homeworkId: undefined,
             studentId: undefined,
-            comment: '',
-            score: null,
+            grade: null,
             toDisplay: false,
         };
         this.getStudents = this.getStudents.bind(this);
         this.getHomework = this.getHomework.bind(this);
+        this.getGrade = this.getGrade.bind(this);
 
         this.handleClass = this.handleClass.bind(this);
         this.handleHomework = this.handleHomework.bind(this);
@@ -31,8 +31,17 @@ class CheckHomework extends Component {
         this.handleComment = this.handleComment.bind(this);
         this.handleScore = this.handleScore.bind(this);
         this.handleDisplay = this.handleDisplay.bind(this);
-        this.postScore = this.postScore.bind(this);
+        this.postGrade = this.postGrade.bind(this);
         this.renderFilter = this.renderFilter.bind(this);
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.state.classId !== undefined && this.state.classId !== null &&
+            this.state.homeworkId !== undefined && this.state.homeworkId !== null &&
+            this.state.studentId !== undefined && this.state.studentId !== null &&
+            this.state.grade === null) {
+            this.getGrade();
+        }
     }
 
     getStudents(classid) {
@@ -77,50 +86,73 @@ class CheckHomework extends Component {
         }
     }
 
-    postScore() {
+    getGrade() {
+        message.info("get grade");
+        let request = new XMLHttpRequest();
+        request.open("GET",
+            "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Grade/" +
+            "?Grade.userid.id=" + this.state.studentId +
+            "&Grade.homeworkid.id=" + this.state.homeworkId, true);
+        request.onreadystatechange = () => {
+            if (request.readyState === 4 && request.status === 200) {
+                let gradeList = JSON.parse(request.responseText);
+                if (gradeList.hasOwnProperty("Grade")) {
+                    this.setState({grade: gradeList["Grade"][0]});
+                }
+            }
+        };
+        request.send();
+
+    }
+
+    postGrade() {
         let msg = window.confirm("暂时不会将发送测试数据到 RMP，放心点！");
         if (msg) {
-            // this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/", true);
-            // this.xmlhttp.setRequestHeader("Content-Type", "application/json");
-            let data = JSON.stringify({
-                ...this.state
-            });
+            let request = new XMLHttpRequest();
+            request.open("PUT",
+                "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Grade/" + this.state.grade.id, true);
+            request.setRequestHeader("Content-Type", "application/json");
+            let data = JSON.stringify(this.state.grade);
             alert(data);
-            // this.xmlhttp.send(data);
+            request.send(data);
         }
         message.success('Processing complete!');
     }
 
     handleClass(value) {
-        this.setState({classId: value});
+        this.setState({
+            classId: value,
+            students: [],
+            homeworks: [],
+            homeworkId: undefined,
+            studentId: undefined,
+            grade: null,
+        });
         if (value !== undefined) {
             this.getStudents(value);
             this.getHomework(value);
-        } else {
-            this.setState({
-                students: [],
-                homeworks: [],
-                homeworkId: undefined,
-                studentId: undefined,
-            });
         }
     }
 
     handleHomework(value) {
-        this.setState({homeworkId: value});
+        this.setState({homeworkId: value, grade: null});
     }
 
     handleStudent(value) {
-        this.setState({studentId: value});
+        this.setState({studentId: value, grade: null});
     }
 
     handleComment(e) {
         let {value} = e.target;
-        this.setState({comment: value});
+        let newGrade = this.state.grade;
+        newGrade.comment = value;
+        this.setState({comment: newGrade});
     }
 
     handleScore(value) {
-        this.setState({score: value});
+        let newGrade = this.state.grade;
+        newGrade.score = value;
+        this.setState({score: newGrade});
     }
 
     handleDisplay(display) {
@@ -150,9 +182,7 @@ class CheckHomework extends Component {
                 </Select>
                 <br/><br/>
                 {
-                    this.state.classId === null || this.state.classId === undefined ||
-                    this.state.studentId === null || this.state.studentId === undefined ||
-                    this.state.homeworkId === null || this.state.homeworkId === undefined ?
+                    this.state.grade === null ?
                         null
                         :
                         <div>
@@ -161,14 +191,15 @@ class CheckHomework extends Component {
                             <span style={{verticalAlign: 'top'}}>评语：</span>
                             <TextArea placeholder="评语" size="large" style={{width: 500, marginBottom: 10}}
                                       autosize={{minRows: 2, maxRows: 5}}
-                                      onChange={this.handleComment} value={this.state.comment}/>
+                                      onChange={this.handleComment} value={this.state.grade.comment}/>
                             <br/>
                             分数：<InputNumber size="large" min={1} max={100} style={{marginBottom: 10}}
-                                            placeholder={"分数"} value={this.state.score} onChange={this.handleScore}/>
+                                            placeholder={"分数"} value={this.state.grade.score}
+                                            onChange={this.handleScore}/>
                             <br/>
                             展示：<Switch onChange={this.handleDisplay} style={{marginBottom: 10}}/>
                             <br/>
-                            <Button onClick={this.postScore} type={"primary"}>
+                            <Button onClick={this.postGrade} type={"primary"}>
                                 rmp send
                             </Button>
                         </div>

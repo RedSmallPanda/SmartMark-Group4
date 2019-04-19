@@ -52,14 +52,12 @@ class Teacher extends Component {
                                 mode="inline"
                                 style={{height: 500}}
                             >
-                                <SubMenu key="sub1"
-                                         title={<span><Icon type="form"/>作业管理</span>}>
+                                <SubMenu key="sub1" title={<span><Icon type="form"/>作业管理</span>}>
                                     <Menu.Item key='1'><Badge count={0} dot>布置作业</Badge></Menu.Item>
                                     <Menu.Item key='2'><Badge count={1} dot>批阅作业</Badge></Menu.Item>
                                 </SubMenu>
-                                <SubMenu key="sub2"
-                                         title={<span><Icon type="ordered-list"/>班级管理</span>}>
-                                    <Menu.Item key='3'>学生管理</Menu.Item>
+                                <SubMenu key="sub2" title={<span><Icon type="ordered-list"/>班级管理</span>}>
+                                    <Menu.Item key='3'>学生一览</Menu.Item>
                                 </SubMenu>
                             </Menu>
                         </div>
