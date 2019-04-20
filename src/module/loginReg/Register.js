@@ -22,7 +22,7 @@ const Register = Form.create()(
         }
 
         componentWillMount() {
-            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Class", true);
+            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Class", true);
             // this.xmlhttp.open("GET", "http://www.baidu.com", true);
             // this.xmlhttp.setRequestHeader("Content-Type","application/json");
             // let data = JSON.stringify({
@@ -74,7 +74,7 @@ const Register = Form.create()(
                 alert("请选择班级")
                 return;
             }
-            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/User", true);
+            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User", true);
             this.xmlhttp.setRequestHeader("Content-Type","application/json");
             this.xmlhttp.onreadystatechange = ()=>{
                 if(this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {

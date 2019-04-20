@@ -88,7 +88,7 @@ class LoginReg extends Component {
             let password=form.getFieldValue("password");
             alert(username+"    "+password)
 
-            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/User/?User.username="+username+"&"+"User.password="+password, true);
+            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/?User.username="+username+"&"+"User.password="+password, true);
             let response="";
             this.xmlhttp.onreadystatechange = ()=>{
                 if(this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
