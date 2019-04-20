@@ -3,189 +3,245 @@ import {Link} from "react-router-dom";
 import {Button, Input, message} from 'antd';
 import Popover from "antd/es/popover";
 import moment from "moment";
+import Cookies from 'js-cookie';
 
 class Content extends Component {
 
     constructor(props) {
         super(props);
-        this.xmlhttp = new XMLHttpRequest();
         this.state = {
-            bookid: 1555590270225,
+            bookid: this.props.bookid,
+            userid: 1,
             content: [{content: 'test1.'}, {content: 'test2.'}],
-            supMarkId:0,
-            inputContent:"",
-            newSentences:[0,1],
-            marks:{
-                id1:{
-                    id: 1,
-                    start: {id:1}, //sentence对象
-                    end: {id:1}, //sentence对象
-                    bookid: {},
-                    userid: {},
-                    content: '批注内容',
-                    time: ''
-
-                }
-            },
-            contentx: {
-                p0: { //第一段
-                    s0: { //第一句话
-                        id: 1, //sentence id
-                        bookid: {}, //book对象
-                        content: '第一段第一句话。', //
-                        paragraph: 0,
-                        sequence: 0,
-                        mark: [{ //批注数组
-                            id: 1,
-                            start: {id:1}, //sentence对象
-                            end: {id:1}, //sentence对象
-                            bookid: {},
-                            userid: {},
-                            content: '批注内容',
-                            time: ''
-                        }]
-                    }
-
-                }
-
-
-            },
+            supMarkId: 0,
+            inputContent: "",
+            newSentences: [0, 1],
+            marks: {},
+            contentx: {},
         };
-        this.getResource = this.getResource.bind(this);
-        this.sortSentence = this.sortSentence.bind(this);
+    }
 
+    componentWillReceiveProps(nextProps, nextContext) {
+        //message.info(JSON.stringify(nextProps), 0);
+        this.setState({...nextProps});
     }
 
     componentDidMount() {
-        this.getResource();
+        this.getSentences();
     }
 
-    sortSentence(unsorted) {
-        let sorted;
-        if (sorted.hasOwnProperty("p0")) {
-            sorted["p0"].push({content: 'test sort'});
-        } else {
-
-        }
-        sorted["p0"].push({content: 'test sort'});
-
-        return [];
-    }
-
-    getResource=()=> {
+    getSentences = () => {
         if (this.state.bookid !== undefined && this.state.bookid !== null && this.state.bookid !== '') {
-            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Sentence/" +
+            let request = new XMLHttpRequest();
+            request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Sentence/" +
                 "?Sentence.bookid.id=" + this.state.bookid, true);
-            this.xmlhttp.onreadystatechange = () => {
-                if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
-                    let sentences = JSON.parse(this.xmlhttp.responseText);
+            request.onreadystatechange = () => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let sentences = JSON.parse(request.responseText);
                     if (sentences.hasOwnProperty("Sentence")) {
                         let unsorted = sentences["Sentence"];
-                        this.setState({content: this.sortSentence(unsorted)});
-
+                        this.getMarks(unsorted);
                     }
                 }
             };
-            // this.xmlhttp.send();
+            request.send();
         }
-    }
+    };
 
-    putOnClick=(id)=>{
-        let data=this.state.marks;
-        data["id"+id].content = this.state.inputContent;
-        data["id"+id].time = moment();
-        let newMark=data["id"+id];
-        let newHttp=new XMLHttpRequest();
-        newHttp.open("PUT", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Mark/"+id, true);
+    getMarks = (unsorted) => {
+        if (this.state.bookid !== undefined && this.state.bookid !== null && this.state.bookid !== '') {
+            if (this.state.userid === undefined || this.state.userid === null || this.state.userid === '') {
+                return;
+            }
+            let request = new XMLHttpRequest();
+            request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Mark/" +
+                "?Mark.bookid.id=" + this.state.bookid +
+                "&Mark.userid.id=" + this.state.userid, true);
+            request.onreadystatechange = () => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let marks = JSON.parse(request.responseText);
+                    let myMarks = [];
+                    if (marks.hasOwnProperty("Mark")) {
+                        myMarks = marks["Mark"];
+                    }
+                    this.sortSentence(unsorted, myMarks);
+                }
+            };
+            request.send();
+        }
+    };
+
+    putOnClick = (id) => {
+        let data = this.state.marks;
+        data["id" + id].content = this.state.inputContent;
+        data["id" + id].time = moment();
+        let newMark = data["id" + id];
+        let newHttp = new XMLHttpRequest();
+        newHttp.open("PUT", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Mark/" + id, true);
         newHttp.setRequestHeader("Content-Type", "application/json");
         newHttp.send(JSON.stringify(newMark));
         this.setState({
-            marks:data,
-            newSentences:[-1,-1],
-            supMarkId:-1,
+            marks: data,
+            newSentences: [-1, -1],
+            supMarkId: -1,
         });
-    }
+    };
 
-    inputOnChange=(e)=>{
-        this.setState({inputContent:e.target.value});
-    }
+    inputOnChange = (e) => {
+        this.setState({inputContent: e.target.value});
+    };
 
-    postOnClick=()=>{
-        this.setState({
-            newSentences:[-1,-1]
-        })
-    }
+    onSentenceMouseDown = (id, para, seq) => {
+        this.setState({sentenceId: id});
+        this.setState({firstPara: para});
+        this.setState({firstSeq: seq})
+    };
 
-    onSentenceMouseDown=(id,para,seq)=>{
-        this.setState({sentenceId:id});
-        this.setState({firstPara:para});
-        this.setState({firstSeq:seq})
-    }
-
-    onSentenceMouseUp=(id,para,seq)=>{
-        let sentenceIds=[];
-        if((para>this.state.firstPara)||(para===this.state.firstPara && seq>=this.state.firstSeq)){
+    onSentenceMouseUp = (id, para, seq) => {
+        let sentenceIds = [];
+        if ((para > this.state.firstPara) || (para === this.state.firstPara && seq >= this.state.firstSeq)) {
             sentenceIds.push(this.state.sentenceId);
             sentenceIds.push(id);
         }
-        else{
+        else {
             sentenceIds.push(this.state.sentenceId);
             sentenceIds.push(id);
         }
         this.setState({
-            newSentences:sentenceIds,
+            newSentences: sentenceIds,
         });
-    }
+    };
 
-    supOnClick=(markId)=>{
-        this.setState({supMarkId:markId});
-    }
+    supOnClick = (markId) => {
+        this.setState({supMarkId: markId});
+    };
 
+    sortSentence = (unsorted, myMarks) => {
+        let sorted = {};
+        let marks = {};
+        unsorted.map(sentence => {
+            let paragraphProp = "p" + sentence.paragraph;
+            let sequenceProp = "s" + sentence.sequence;
+            if (!sorted.hasOwnProperty(paragraphProp)) {
+                sorted[paragraphProp] = {};
+            }
+            if (!sorted[paragraphProp].hasOwnProperty(sequenceProp)) {
+                sorted[paragraphProp][sequenceProp] = {};
+            }
+            sorted[paragraphProp][sequenceProp] = sentence;
+            sorted[paragraphProp][sequenceProp]["mark"] = [];
+        });
+        myMarks.map(mark => {
+            marks["id" + mark.id] = mark;
+            sorted = this.combineMark(mark, sorted);
+        });
+        this.setState({
+            contentx: sorted,
+            marks: marks,
+        });
+        console.log(sorted);
+        console.log(marks);
+    };
 
-    startMark(e) {
-        e.preventDefault();
-    }
+    combineMark = (mark, sorted) => {
+        let p = mark.start.paragraph;
+        if (p === mark.end.paragraph) {
+            for (let s = mark.start.sequence; s <= mark.end.sequence; s++) {
+                sorted["p" + p]["s" + s]["mark"].push(mark);
+            }
+        } else {
+            let from = mark.start.sequence;
+            for (; p < mark.end.paragraph; p++) {
+                for (let s = from; sorted["p" + p].hasOwnProperty("s" + s); s++) {
+                    sorted["p" + p]["s" + s]["mark"].push(mark);
+                }
+                from = 0;
+            }
+            if (p === mark.end.paragraph) {
+                for (let s = 0; s <= mark.end.sequence; s++) {
+                    sorted["p" + p]["s" + s]["mark"].push(mark);
+                }
+            } else {
+                alert("combine error");
+            }
+        }
+        return sorted;
+    };
 
-    endMark(e) {
+    postOnClick = (startId, endId) => {
+        let newMark = {};
+        newMark["start"] = {id: startId};
+        newMark["end"] = {id: endId};
+        newMark["bookid"] = {id: this.state.bookid};
+        newMark["userid"] = {id: Cookies.get("userid")};
+        newMark["content"] = this.state.inputContent;
+        newMark["time"] = moment();
 
-    }
+        let newHttp = new XMLHttpRequest();
+        newHttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Mark/", true);
+        newHttp.setRequestHeader("Content-Type", "application/json");
+        newHttp.onreadystatechange = () => {
+            if (newHttp.readyState === 4 && newHttp.status === 200) {
+                this.setState({
+                    newSentences: [-1, -1],
+                    marks: this.combineMark(newMark, this.state.contentx),
+                });
+            }
+            // 新的数据存放在newMark中，这里写setState函数，记得setState中要设置newSentences:[-1,-1]，
+            // 要完整的一条mark的话需要用返回值，newMark中关联数据只有id
+        };
+        newHttp.send(JSON.stringify(newMark));
+    };
 
     render() {
-        let contentRender=[];
-        let i=0;
-        let j=0;
-        while((this.state.contentx).hasOwnProperty(("p"+i))){
-            let temp_p=this.state.contentx[("p"+i)];
-            let para=[];
-            while(temp_p.hasOwnProperty(("s"+j))){
-                let temp_s=this.state.contentx[("p"+i)][("s"+j)];
-                let text=[];
-                if((temp_s.mark).length>0){
-                    if(this.state.newSentences[1]!==temp_s.id) {
-                        para.push(<text onMouseDown={()=>{this.onSentenceMouseDown(temp_s.id,temp_s.paragraph,temp_s.sequence)}} onMouseUp={()=>{this.onSentenceMouseUp(temp_s.id,temp_s.paragraph,temp_s.sequence)}} className='sentence' style={{backgroundColor:"yellow"}}>{temp_s.content}</text>);
+        let contentRender = [];
+        let i = 0;
+        let j = 0;
+        while ((this.state.contentx).hasOwnProperty(("p" + i))) {
+            let temp_p = this.state.contentx[("p" + i)];
+            let para = [];
+            while (temp_p.hasOwnProperty(("s" + j))) {
+                let temp_s = this.state.contentx[("p" + i)][("s" + j)];
+                if ((temp_s.mark).length > 0) {
+                    if (this.state.newSentences[1] !== temp_s.id) {
+                        para.push(<text onMouseDown={() => {
+                            this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                        }} onMouseUp={() => {
+                            this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                        }} className='sentence' style={{backgroundColor: "yellow"}}>{temp_s.content}</text>);
                     }
                     else {
                         para.push(<Popover content={(
-                                             <div>
-                                                 <div><Input style={{height:90}} onChange={this.inputOnChange}></Input></div>
-                                                 <div><Button onClick={this.postOnClick}>Submit</Button></div>
-                                              </div>
-                                          )}
+                            <div>
+                                <div><Input style={{height: 90}} onChange={this.inputOnChange}/></div>
+                                <div><Button onClick={this.postOnClick}>Submit</Button></div>
+                            </div>
+                        )}
                                            title="New Mark"
                                            visible={true}
-                        ><text onMouseDown={()=>{this.onSentenceMouseDown(temp_s.id,temp_s.paragraph,temp_s.sequence)}} onMouseUp={()=>{this.onSentenceMouseUp(temp_s.id,temp_s.paragraph,temp_s.sequence)}} className='sentence' style={{backgroundColor:"yellow"}}>{temp_s.content}</text></Popover>);
+                        >
+                            <text onMouseDown={() => {
+                                this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                            }} onMouseUp={() => {
+                                this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                            }} className='sentence' style={{backgroundColor: "yellow"}}>{temp_s.content}</text>
+                        </Popover>);
                     }
 
 
-                    for(let m=0;m<(temp_s.mark).length;m++){
-                        if(temp_s.mark[m].end.id===
-                            temp_s.id){
-                            if(this.state.supMarkId===temp_s.mark[m].id){
+                    for (let m = 0; m < (temp_s.mark).length; m++) {
+                        if (temp_s.mark[m].end.id ===
+                            temp_s.id) {
+                            if (this.state.supMarkId === temp_s.mark[m].id) {
                                 para.push(<Popover
                                     content={(
                                         <div>
-                                            <div><Input style={{height:90}} onChange={this.inputOnChange} defaultValue={this.state.marks[("id"+temp_s.mark[m].id)].content}></Input></div>
-                                            <div><Button onClick={()=>{this.putOnClick(temp_s.mark[m].id)}}>Submit</Button></div>
+                                            <div><Input style={{height: 90}} onChange={this.inputOnChange}
+                                                        defaultValue={this.state.marks[("id" + temp_s.mark[m].id)].content}/>
+                                            </div>
+                                            <div><Button onClick={() => {
+                                                this.putOnClick(temp_s.mark[m].id)
+                                            }}>Submit</Button></div>
                                         </div>
                                     )}
                                     title="Mark"
@@ -206,19 +262,21 @@ class Content extends Component {
                 }
                 j++;
             }
-            contentRender.push(<div>&nbsp;&nbsp;&nbsp;&nbsp;{para}</div>)
+            contentRender.push(<div>&nbsp;&nbsp;&nbsp;&nbsp;{para}</div>);
+            console.log(para);
             i++;
 
 
         }
+        console.log(contentRender);
         return (
             <div className="HomePage">
-                <h1>content page</h1>
-                <h2>book title</h2>
                 <div className="content">
                     {
-                       contentRender
-                    }
+                        contentRender
+                    }{
+                        JSON.stringify(this.state.contentx)
+                }
                 </div>
                 <Link to='/'>back to app</Link>
             </div>
