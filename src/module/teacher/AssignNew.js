@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import moment from 'moment';
 import 'antd/dist/antd.css';
-import {Steps, Button, message, Select, Input, DatePicker, Row, Col} from 'antd';
+import {Steps, Button, message, Input, DatePicker, Popconfirm, Icon} from 'antd';
 import Content from "../Content";
+import ClassPicker from "../ClassPicker";
+import BookPicker from "./BookPicker";
 
 const Step = Steps.Step;
-const Option = Select.Option;
-const { TextArea } = Input;
+const {TextArea} = Input;
 const steps = [{
     title: '选择班级',
     description: 'Classes',
@@ -20,49 +21,49 @@ const steps = [{
     title: '确认发布',
     description: 'Publish',
 }];
-const classes = [{
-    id: 1,
-    name: 'F1603701'
-}, {
-    id: 2,
-    name: 'F1603702'
-}, {
-    id: 3,
-    name: 'F1603703'
-}];
-const books = [{
-    id: 1,
-    title: 'C++ Primer Plus(第6版)'
-}, {
-    id: 2,
-    title: 'Java核心技术 卷I'
-}];
 
 class AssignNew extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             current: 0,
-            classes: [],
-            book: [],
+            classid: [],
+            bookid: [],
             deadline: null,
-            requirement: "",
+            description: "",
         };
         this.xmlhttp = new XMLHttpRequest();
+        this.recursiveXMLHttp = new XMLHttpRequest();
+        this.clear = this.clear.bind(this);
         this.next = this.next.bind(this);
         this.prev = this.prev.bind(this);
         this.postHomework = this.postHomework.bind(this);
-        this.renderStep = this.renderStep.bind(this);
+        this.homeworkCallback = this.homeworkCallback.bind(this);
+        this.assignByClass = this.assignByClass.bind(this);
+        this.recursiveInitializeGrade = this.recursiveInitializeGrade.bind(this);
+
         this.handleClass = this.handleClass.bind(this);
         this.handleBook = this.handleBook.bind(this);
         this.handleDeadline = this.handleDeadline.bind(this);
-        this.handleRequirement = this.handleRequirement.bind(this);
+        this.handleDescription = this.handleDescription.bind(this);
+        this.renderStep = this.renderStep.bind(this);
+    }
+
+    clear() {
+        this.setState({
+            current: 0,
+            classid: [],
+            bookid: [],
+            deadline: null,
+            description: "",
+        });
     }
 
     next() {
-        if (this.state.current === 0 && this.state.classes.length === 0) {
+        if (this.state.current === 0 && this.state.classid.length === 0) {
             message.warning("请先选择班级！");
-        } else if (this.state.current === 1 && this.state.book.length === 0) {
+        } else if (this.state.current === 1 && this.state.bookid.length === 0) {
             message.warning("请选择书籍！");
         } else if (this.state.current === 2 && this.state.deadline === null) {
             message.warning("请选择截止时间！");
@@ -77,36 +78,114 @@ class AssignNew extends Component {
         this.setState({current: prev});
     }
 
-    postHomework() {
-        let msg = window.confirm("暂时不会将发送测试数据到 RMP，放心点！");
-        if (msg) {
-            // this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/", true);
-            // this.xmlhttp.setRequestHeader("Content-Type", "application/json");
+    recursiveInitializeGrade(homeworkId) {
+        if (this.studentCount < this.users.length) {
+            this.recursiveXMLHttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Grade/", true);
+            this.recursiveXMLHttp.setRequestHeader("Content-Type", "application/json");
             let data = JSON.stringify({
-                classes: this.state.classes,
-                book: this.state.book,
-                deadline: this.state.deadline,
-                requirement: this.state.requirement,
+                userid: {id: this.users[this.studentCount].id},
+                homeworkid: {id: homeworkId},
+                comment: '教师暂未批改',
+                score: -1
             });
-            alert(data);
-            // this.xmlhttp.send(data);
+            this.recursiveXMLHttp.onreadystatechange = () => {
+                if (this.recursiveXMLHttp.readyState === 4 && this.recursiveXMLHttp.status === 200) {
+                    this.studentCount += 1;
+                    this.recursiveInitializeGrade(homeworkId);
+                }
+            };
+            this.recursiveXMLHttp.send(data);
+        } else {
+            if (this.studentCount === this.users.length) {
+                this.classCount += 1;
+                message.success("Processed: Class " + this.classCount, 0);
+                this.assignByClass(homeworkId);
+            }
         }
-        message.success('Processing complete!');
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+    }
+
+    assignByClass(homeworkId) {
+        if (this.classCount < this.state.classid.length) {
+            message.loading("Processing Class " + (this.classCount + 1), 0);
+            let classId = this.state.classid[this.classCount];
+            let request = new XMLHttpRequest();
+            request.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/" +
+                "?User.auth=student&User.classid.id=" + classId, true);
+            request.onreadystatechange = () => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let studentList = JSON.parse(request.responseText);
+                    if (studentList.hasOwnProperty("User")) {
+                        this.users = studentList["User"];
+                        this.studentCount = 0;
+                        message.loading("Initializing Grades...", 0);
+                        this.recursiveInitializeGrade(homeworkId);
+                    }
+                } else if (request.readyState === 4) {
+                    message.error('Failure: get student when adding grade', 0);
+                }
+            };
+            request.send();
+        } else {
+            if (this.classCount === this.state.classid.length) {
+                message.success("All processed !!!", 0);
+                message.info("You can refresh the page now", 0);
+                // message.destroy();
+                // message.success('Processing complete!', 1);
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 1000);
+            }
+        }
+    }
+
+    homeworkCallback() {
+        if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
+            message.success('Homework Processed.', 0);
+
+            let homeworkId = JSON.parse(this.xmlhttp.responseText)["id"];
+            this.classCount = 0;
+            this.assignByClass(homeworkId);
+
+        } else if (this.xmlhttp.readyState === 4) {
+            message.error('Homework Failure.', 0);
+        }
+    }
+
+    postHomework() {
+        let msg = window.confirm("确认布置？");
+        if (msg) {
+            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/", true);
+            this.xmlhttp.setRequestHeader("Content-Type", "application/json");
+            let classes = [];
+            this.state.classid.map(classId => {
+                classes.push({id: classId})
+            });
+            let data = JSON.stringify({
+                classid: classes,
+                bookid: {id: this.state.bookid},
+                deadline: this.state.deadline,
+                description: this.state.description,
+                time: moment()
+            });
+            this.xmlhttp.onreadystatechange = this.homeworkCallback;
+            this.xmlhttp.send(data);
+            message.loading('Processing homework...', 0);
+        }
     }
 
     renderActions() {
         return (
             <div className="steps-action" align="right">
+                <Popconfirm title={"确认清空？"} onConfirm={this.clear}>
+                    <Button type="danger" style={{marginRight: 8}}>CLEAR</Button>
+                </Popconfirm>
                 {
                     this.state.current > 0 &&
-                    <Button style={{marginRight: 8}} onClick={this.prev}>Previous</Button>
+                    <Button style={{marginRight: 8}} onClick={this.prev}><Icon type="left"/>Previous</Button>
                 }
                 {
                     this.state.current < steps.length - 1
-                    && <Button type="primary" onClick={() => this.next()}>Next</Button>
+                    && <Button type="primary" onClick={() => this.next()}>Next<Icon type="right"/></Button>
                 }
                 {
                     this.state.current === steps.length - 1 &&
@@ -117,81 +196,56 @@ class AssignNew extends Component {
     }
 
     handleClass(value) {
-        this.setState({classes: value});
+        this.setState({classid: value});
     }
 
     handleBook(value) {
-        this.setState({book: value});
+        this.setState({bookid: value === undefined ? [] : value});
     }
 
     handleDeadline(value) {
         this.setState({deadline: value});
     }
 
-    handleRequirement(e) {
+    handleDescription(e) {
         const {value} = e.target;
-        this.setState({requirement: value});
-    }
-
-    renderClassOptions() {
-        return classes.map(item => <Option value={item.id}>{item.name}</Option>);
-    }
-
-    renderBookOptions() {
-        return books.map(item => <Option value={item.id}>{item.title}</Option>);
+        this.setState({description: value});
     }
 
     renderStep() {
         switch (this.state.current) {
             case 0:
-                return (
-                    <div>
-                        <Select value={this.state.classes} onChange={this.handleClass} mode="multiple"
-                                style={{width: 400, marginRight: 10}} placeholder={"选择班级"} allowClear>
-                            {this.renderClassOptions()}
-                        </Select>
-                    </div>
-                );
+                return <ClassPicker value={this.state.classid} onChange={this.handleClass} mode="multiple" allowClear/>;
             case 1:
                 return (
                     <div>
-                        <Select placeholder="选择书籍" className={"BookSelect"}
-                                value={this.state.book} onChange={this.handleBook}
-                                style={{width: 400, marginBottom: 10}}>
-                            {this.renderBookOptions()}
-                        </Select>
-                        {this.state.book.length !== 0 && <Content/>}
+                        <BookPicker value={this.state.bookid} onChange={this.handleBook} allowClear/>
+                        {this.state.bookid.length !== 0 && <Content/>}
                     </div>
                 );
             case 2:
                 return (
                     <div>
-                        截止时间：<DatePicker style={{marginBottom: 10}} format="YYYY-MM-DD HH:mm:ss"
-                                         value={this.state.deadline} onChange={this.handleDeadline}
-                                         showTime={{defaultValue: moment('00:00:00', 'HH:mm:ss')}}/>
+                        截止时间：
+                        <DatePicker style={{marginBottom: 10}} format="YYYY-MM-DD HH:mm:ss"
+                                    value={this.state.deadline} onChange={this.handleDeadline}
+                                    showTime={{defaultValue: moment('00:00:00', 'HH:mm:ss')}}/>
                         <br/><br/>
                         <span style={{verticalAlign: 'top'}}>补充信息：</span>
-                        <TextArea value={this.state.requirement} placeholder={"补充作业信息"}
+                        <TextArea value={this.state.description} placeholder={"补充作业信息"}
                                   style={{width: 400}} autosize={{minRows: 2, maxRows: 10}}
-                                  onChange={this.handleRequirement}/>
+                                  onChange={this.handleDescription}/>
                     </div>
                 );
             case 3:
                 return (
                     <div>
-                        班级：
-                        <Select value={this.state.classes} mode="multiple" disabled
-                                style={{width: 400, marginRight: 10}}>
-                            {this.renderClassOptions()}
-                        </Select><br/><br/>
-                        书籍：
-                        <Select value={this.state.book} style={{width: 400, marginRight: 10}} disabled>
-                            {this.renderBookOptions()}
-                        </Select><br/><br/>
+                        班级：<ClassPicker value={this.state.classid} mode="multiple" disabled/><br/><br/>
+                        书籍：<BookPicker value={this.state.bookid} disabled/><br/><br/>
                         截止时间：
                         <DatePicker format="YYYY-MM-DD HH:mm:ss" value={this.state.deadline} disabled/><br/><br/>
                         <span style={{verticalAlign: 'top'}}>补充信息：</span>
-                        <TextArea value={this.state.requirement} autosize={{minRows: 2, maxRows: 10}}
+                        <TextArea value={this.state.description} autosize={{minRows: 2, maxRows: 10}}
                                   style={{width: 400, marginRight: 10}} disabled/>
                     </div>
                 );
@@ -217,4 +271,3 @@ class AssignNew extends Component {
 }
 
 export default AssignNew;
-
