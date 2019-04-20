@@ -57,7 +57,7 @@ class SearchResult extends Component {
                         <div/> :
                         <List.Item>
                             <List.Item.Meta
-                                avatar={<img style={{height: 220}} src={item.url}/>}
+                                avatar={<img style={{height: 220, width: 165}} src={item.url}/>}
                                 title={
                                     <div style={{paddingTop: 10, paddingBottom: 10}}>
                                         <a style={{fontSize: 25}}
