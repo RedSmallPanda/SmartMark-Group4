@@ -1,186 +1,6 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {Link} from "react-router-dom";
-
-let sentences = [
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-    {
-        id: 1,
-        content: "Hello, "
-    },
-    {
-        id: 2,
-        content: "world! "
-    },
-    {
-        id: 3,
-        content: "I'm SmartMark. "
-    },
-];
-// let marks = [
-//     {
-//         bookId: 1,
-//         id: 1,
-//         start: 1,
-//         end: 2,
-//         text: "test",
-//         type: null,
-//     }
-// ];
+import {message} from 'antd';
 
 class Content extends Component {
 
@@ -188,28 +8,78 @@ class Content extends Component {
         super(props);
         this.xmlhttp = new XMLHttpRequest();
         this.state = {
-            content: sentences
+            bookid: 1555590270225,
+            content: [{content: 'test1.'}, {content: 'test2.'}],
+            contentx: {
+                p0: { //第一段
+                    s0: { //第一句话
+                        id: 1, //sentence id
+                        bookid: {}, //book对象
+                        content: '第一段第一句话。', //
+                        paragraph: 0,
+                        sequence: 0,
+                        mark: [{ //批注数组
+                            id: 1,
+                            start: {}, //sentence对象
+                            end: {}, //sentence对象
+                            bookid: {},
+                            userid: {},
+                            content: '批注内容',
+                            time: ''
+                        }, {
+                            //...
+                        }]
+                    },
+                    s1: {}
+                },
+                p1: {
+                    s0: {}
+                }
+            },
         };
         this.getResource = this.getResource.bind(this);
-        this.renderContent = this.renderContent.bind(this);
+        this.sortSentence = this.sortSentence.bind(this);
+    }
+
+    componentDidMount() {
+        this.getResource();
+    }
+
+    sortSentence(unsorted) {
+        let sorted;
+        if (sorted.hasOwnProperty("p0")) {
+            sorted["p0"].push({content: 'test sort'});
+        } else {
+
+        }
+        sorted["p0"].push({content: 'test sort'});
+
+        return [];
     }
 
     getResource() {
-        let id = "1";
-        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/" + id, true);
-        this.xmlhttp.send();
+        if (this.state.bookid !== undefined && this.state.bookid !== null && this.state.bookid !== '') {
+            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Sentence/" +
+                "?Sentence.bookid.id=" + this.state.bookid, true);
+            this.xmlhttp.onreadystatechange = () => {
+                if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
+                    let sentences = JSON.parse(this.xmlhttp.responseText);
+                    if (sentences.hasOwnProperty("Sentence")) {
+                        let unsorted = sentences["Sentence"];
+                        this.setState({content: this.sortSentence(unsorted)});
+                    }
+                }
+            };
+            // this.xmlhttp.send();
+        }
     }
-    startMark(e){
+
+    startMark(e) {
         e.preventDefault();
     }
-    endMark(e){
 
-    }
+    endMark(e) {
 
-    renderContent() {
-        return this.state.content.map(function (sentence) {
-            return <text className='sentence' onClick={() => alert(sentence.content)}>{sentence.content}</text>;
-        });
     }
 
     render() {
@@ -218,7 +88,13 @@ class Content extends Component {
                 <h1>content page</h1>
                 <h2>book title</h2>
                 <div className="content">
-                    {this.renderContent()}
+                    {
+                        this.state.content.map(sentence =>
+                            <text className='sentence'
+                                  onMouseDown={() => message.info(sentence.content)}
+                                  onMouseUp={() => message.info(sentence.content)}>{sentence.content}</text>
+                        )
+                    }
                 </div>
                 <Link to='/'>back to app</Link>
             </div>
