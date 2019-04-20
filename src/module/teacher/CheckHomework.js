@@ -106,7 +106,7 @@ class CheckHomework extends Component {
     }
 
     postGrade() {
-        let msg = window.confirm("暂时不会将发送测试数据到 RMP，放心点！");
+        let msg = window.confirm("是否提交分数？");
         if (msg) {
             let request = new XMLHttpRequest();
             request.open("PUT",
