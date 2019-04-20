@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import Login from './Login'
 import Register from './Register'
 import "../../css/App.css"
+import Button from "antd/es/button";
 
 
 const SubMenu = Menu.SubMenu;
@@ -12,17 +13,21 @@ const Search = Input.Search;
 
 
 class LoginReg extends Component {
-    state = {
-        isLogin: this.props.isLogin,
-        isAdmin: this.props.isAdmin,
-        visible: !this.props.isLogin,
-        regVisible: false,
-        type: '',
-        current: window.location.pathname,
-        search: '',
-        imgUrl: '',
-    };
-
+    constructor(props) {
+        super(props)
+        this.xmlhttp = new XMLHttpRequest();
+        this.state = {
+            isLogin: this.props.isLogin,
+            isAdmin: this.props.isAdmin,
+            visible: !this.props.isLogin,
+            regVisible: false,
+            type: '',
+            current: window.location.pathname,
+            search: '',
+            imgUrl: '',
+            user:"",
+        };
+    }
     componentWillMount() {
 
     }
@@ -54,9 +59,11 @@ class LoginReg extends Component {
         });
     };
 
-    showModal = () => {
-        this.setState({ visible: true });
-    };
+    testcookie=()=>{
+        let p=Cookies.get("classes");
+        console.log((p[0]).id)
+        alert(JSON.parse(p)[0].id)
+    }
 
     handleCancel = () => {
       //  this.setState({ visible: false });
@@ -76,77 +83,62 @@ class LoginReg extends Component {
             if (err) {
                 return;
             }
-            console.log('Received values of form username: '+form.getFieldValue("username"));
-            console.log('password: '+form.getFieldValue("password"));
 
-            let params = new URLSearchParams();
-            params.append("username", JSON.stringify(form.getFieldValue("username")));
-            params.append("password", JSON.stringify(form.getFieldValue("password")));
-            // axios.post("/login",params)
-            //     .then(function(response){
-            //         console.log(response.data);
-            //         if(response.data===null){
-            //             self.setState({
-            //                 visible: false,
-            //             });
-            //             message.error("用户名或密码错误");
-            //         } else if (response.data === "banned") {
-            //             self.setState({
-            //                 visible: false,
-            //             });
-            //             message.info("该账户已被禁用");
-            //         } else if (response.data === "unactivated") {
-            //             self.setState({
-            //                 visible: false,
-            //             });
-            //             message.info("账户尚未激活，请先查看注册邮箱进行激活。");
-            //         } else {
-            //             Cookies.set('username', values.username);
-            //             if (values.username === 'admin') {
-            //                 self.setState({
-            //                     visible: false,
-            //                 });
-            //                 self.props.handleLogin({
-            //                     isLogin: true,
-            //                     isAdmin: true,
-            //                 });
-            //             } else {
-            //                 self.setState({
-            //                     visible: false,
-            //                 });
-            //                 self.props.handleLogin({
-            //                     isLogin: true,
-            //                     isAdmin: false,
-            //                 });
-            //             }
-            //             window.location.reload();
-            //         }
-            //     })
-            //     .catch(function (error) {
-            //         console.log(error);
-            //     });
+          let username=form.getFieldValue("username");
+            let password=form.getFieldValue("password");
+            alert(username+"    "+password)
 
-            Cookies.set('username', values.username);
-            Cookies.set('auth', values.username);
-                            if (values.username === 'admin') {
-                                self.setState({
-                                    visible: false,
-                                });
-                                self.props.handleLogin({
-                                    isLogin: true,
-                                    isAdmin: true,
-                                });
-                            } else {
-                                self.setState({
-                                    visible: false,
-                                });
-                                self.props.handleLogin({
-                                    isLogin: true,
-                                    isAdmin: false,
-                                });
-                            }
-                            window.location.reload();
-            form.resetFields();
+            this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/User/?User.username="+username+"&"+"User.password="+password, true);
+            let response="";
+            this.xmlhttp.onreadystatechange = ()=>{
+                if(this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
+                    alert(this.xmlhttp.responseText)
+                    if(this.xmlhttp.responseText==="{}"){
+                        alert("用户名密码错误" )
+                        form.resetFields();
+                        window.location.reload();
+                        return;
+                    }
+
+                    response=this.xmlhttp.responseText;
+                    let user=JSON.parse(response).User[0];
+                    let userid=user.id;
+                    let auth=user.auth;
+                    let classes=user.classid;
+                    Cookies.set('userid', userid);
+                    Cookies.set('username',form.getFieldValue("username"))
+                    Cookies.set('auth', auth);
+                    Cookies.set('classes',classes)
+
+                    if (values.username === 'admin') {
+                        self.setState({
+                            visible: false,
+                        });
+                        self.props.handleLogin({
+                            isLogin: true,
+                            isAdmin: true,
+                        });
+                    } else {
+                        self.setState({
+                            visible: false,
+                        });
+                        self.props.handleLogin({
+                            isLogin: true,
+                            isAdmin: false,
+                        });
+                    }
+                    form.resetFields();
+                    window.location.reload();
+                }
+                else if(this.xmlhttp.readyState === 4 && this.xmlhttp.status != 200){
+                    alert("登录失败")
+                    form.resetFields();
+                    window.location.reload();
+                }
+            };
+            this.xmlhttp.send();
+
+
         });
     };
 
@@ -176,52 +168,7 @@ class LoginReg extends Component {
    //     this.setState({ regVisible: false });
     };
 
-    handleRegCreate = () => {
-        let self = this;
-        const form = this.regFormRef.props.form;
-        form.validateFields((err, values) => {
-            if (err) {
-                return;
-            }
 
-            console.log('Received values of form username: '+form.getFieldValue("username") );
-            console.log('password: '+form.getFieldValue("password"));
-            console.log('nickname: '+form.getFieldValue("nickname"));
-            console.log('email: '+form.getFieldValue("email"));
-            console.log('phone: '+form.getFieldValue("phone"));
-
-            let params = new URLSearchParams();
-            params.append("username", JSON.stringify(form.getFieldValue("username")));
-            params.append("password", JSON.stringify(form.getFieldValue("password")));
-            params.append("nickname", JSON.stringify(form.getFieldValue("nickname")));
-            params.append("email", JSON.stringify(form.getFieldValue("email")));
-            params.append("phone", JSON.stringify(form.getFieldValue("phone")));
-            // axios.post("/register",params)
-            //     .then(function(response){
-            //         console.log(response.data);
-            //         if(response.data===null){//TODO: more detail about reg failure
-            //             self.setState({
-            //                 regVisible: false,
-            //             });
-            //             message.info("注册失败");
-            //         } else {
-            //             message.info("验证邮件已发到邮箱，请前往激活！");
-            //             self.setState({
-            //                 regVisible: false,
-            //             });
-            //             window.location.reload();
-            //         }
-            //     })
-            //     .catch(function (error) {
-            //         console.log(error);
-            //     });
-                        self.setState({
-                            regVisible: false,
-                        });
-                        window.location.reload();
-            form.resetFields();
-        });
-    };
 
     saveRegFormRef = (formRef) => {
         this.regFormRef = formRef;
@@ -246,10 +193,12 @@ class LoginReg extends Component {
                     wrappedComponentRef={this.saveRegFormRef}
                     visible={this.state.regVisible}
                     onCancel={this.handleRegCancel}
-                    onLogin={this.handleRegCreate}
+
                     RegisterToLogin={this.RegisterToLogin}
                 />
 
+
+                <Button onClick={this.testcookie}> TEST COOKIE  </Button>
 
             </div>;
         return (

@@ -142,7 +142,7 @@ const Login = Form.create()(
                                 <Col span={6}>
                                     <Row style={{height:'18px'}}/>
                                     <span style={{marginBottom:"0px",cursor: "pointer"}}>
-                                        <a onClick={onReset}>忘记密码？</a>
+
                                     </span>
                                 </Col>
                                 <Col span={7}/>

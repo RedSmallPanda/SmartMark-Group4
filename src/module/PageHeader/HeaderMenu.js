@@ -68,6 +68,8 @@ class HeaderMenu extends Component {
         });
         Cookies.remove('username');
         Cookies.remove('auth');
+        Cookies.remove('userid');
+        Cookies.remove('classes');
         this.handleHomePage();
     };
 
@@ -99,6 +101,9 @@ class HeaderMenu extends Component {
     };
 
     handleAvatar = () =>{
+        if(Cookies.get("auth")==="student"){
+            window.location.href='/homework';
+        }
         window.location.href='/info';
     };
 
@@ -204,7 +209,7 @@ class HeaderMenu extends Component {
                             {
 
                                     <Avatar icon="user" onClick={this.handleAvatar}
-                                            style={{cursor: "pointer"}}/>
+                                            style={{cursor: "pointer"}}>{Cookies.get("username")}</Avatar>
                             }
                         </Col>
                         <Col span={2}>
