@@ -23,7 +23,13 @@ let homeworkRequest="这就是详细作业要求，赏析这篇文章，批注�
 let teacherComment="完成的很好啥的金黄色即可打虎撒得很快圣诞节客户端看撒谎的撒即可打火机卡刷的卡十多块使雕件客单价的好时机卡回单卡是哪家的哈萨克打卡点时空师大会尽快";
 
 class InProgressHomework extends Component{
+    gotoHomework(id){
+        window.location.href = "/content/"+id;
+    }
+
     render(){
+
+
         return(
 
             <Card
@@ -80,7 +86,7 @@ class InProgressHomework extends Component{
                     <Col span={1}>
                     </Col>
                     <Col span={22}>
-                        <Button type="primary" className="rightThings">
+                        <Button type="primary" className="rightThings" onClick={()=>this.gotoHomework(this.props.data.homeworkid.bookid.id)}>
                             去做作业<Icon type="right" />
                         </Button>
                     </Col>
@@ -193,7 +199,7 @@ class FinishedResult extends Component{
         return <div>{this.props.homeworkData.map(item=>{
             let timestamp = new Date(item.homeworkid.deadline).getTime();
             if(timestamp<=this.props.nowTime) {
-                return <div><FinishedHomework data={item}/>
+                reurn <div><FinishedHomework data={item}/>
                     <br/></div>;
                 // else {
                 //     return <div><FinishedHomework data={item}/><br/></div>;
