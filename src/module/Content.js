@@ -11,18 +11,17 @@ class Content extends Component {
         super(props);
         this.state = {
             bookid: this.props.bookid,
-            userid: 1,
-            content: [{content: 'test1.'}, {content: 'test2.'}],
-            supMarkId: 0,
-            inputContent: "",
-            newSentences: [0, 1],
+            userid: this.props.userid,
             marks: {},
             contentx: {},
+            newSentences: [0, 1],
+            supMarkId: 0,
+            inputContent: "",
+            sentenceId: -1,
         };
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-        //message.info(JSON.stringify(nextProps), 0);
         this.setState({...nextProps});
     }
 
@@ -71,6 +70,14 @@ class Content extends Component {
         }
     };
 
+    onCancel = () => {
+        this.setState({
+            supMarkId: -1,
+            newSentences: [-1, -1],
+            sentenceId: -1,
+        })
+    };
+
     putOnClick = (id) => {
         let data = this.state.marks;
         data["id" + id].content = this.state.inputContent;
@@ -98,14 +105,21 @@ class Content extends Component {
     };
 
     onSentenceMouseUp = (id, para, seq) => {
+        this.onCancel();
         let sentenceIds = [];
         if ((para > this.state.firstPara) || (para === this.state.firstPara && seq >= this.state.firstSeq)) {
             sentenceIds.push(this.state.sentenceId);
             sentenceIds.push(id);
+            if (sentenceIds[0] === -1) {
+                return;
+            }
         }
         else {
-            sentenceIds.push(this.state.sentenceId);
             sentenceIds.push(id);
+            sentenceIds.push(this.state.sentenceId);
+            if (sentenceIds[0] === -1) {
+                return;
+            }
         }
         this.setState({
             newSentences: sentenceIds,
@@ -113,6 +127,7 @@ class Content extends Component {
     };
 
     supOnClick = (markId) => {
+        this.onCancel();
         this.setState({supMarkId: markId});
     };
 
@@ -168,12 +183,14 @@ class Content extends Component {
         return sorted;
     };
 
-    postOnClick = (startId, endId) => {
+    postOnClick = () => {
+        let startId = this.state.newSentences[0];
+        let endId = this.state.newSentences[1];
         let newMark = {};
         newMark["start"] = {id: startId};
         newMark["end"] = {id: endId};
         newMark["bookid"] = {id: this.state.bookid};
-        newMark["userid"] = {id: Cookies.get("userid")};
+        newMark["userid"] = {id: this.state.userid};
         newMark["content"] = this.state.inputContent;
         newMark["time"] = moment();
 
@@ -182,9 +199,13 @@ class Content extends Component {
         newHttp.setRequestHeader("Content-Type", "application/json");
         newHttp.onreadystatechange = () => {
             if (newHttp.readyState === 4 && newHttp.status === 200) {
+                newMark = JSON.parse(newHttp.responseText);
+                let newMarks = this.state.marks;
+                newMarks["id" + newMark.id] = newMark;
                 this.setState({
                     newSentences: [-1, -1],
-                    marks: this.combineMark(newMark, this.state.contentx),
+                    contentx: this.combineMark(newMark, this.state.contentx),
+                    marks: newMarks,
                 });
             }
             // 新的数据存放在newMark中，这里写setState函数，记得setState中要设置newSentences:[-1,-1]，
@@ -196,92 +217,156 @@ class Content extends Component {
     render() {
         let contentRender = [];
         let i = 0;
-        let j = 0;
-        while ((this.state.contentx).hasOwnProperty(("p" + i))) {
-            let temp_p = this.state.contentx[("p" + i)];
+
+        while (this.state.contentx.hasOwnProperty("p" + i)) {
+            let temp_p = this.state.contentx["p" + i];
             let para = [];
-            while (temp_p.hasOwnProperty(("s" + j))) {
-                let temp_s = this.state.contentx[("p" + i)][("s" + j)];
-                if ((temp_s.mark).length > 0) {
+            let j = 0;
+            while (temp_p.hasOwnProperty("s" + j)) {
+                let temp_s = this.state.contentx["p" + i]["s" + j];
+                if (temp_s.mark.length > 0) {
                     if (this.state.newSentences[1] !== temp_s.id) {
-                        para.push(<text onMouseDown={() => {
-                            this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
-                        }} onMouseUp={() => {
-                            this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
-                        }} className='sentence' style={{backgroundColor: "yellow"}}>{temp_s.content}</text>);
+                        para.push(
+                            <text className='sentence' style={{backgroundColor: "yellow"}}
+                                  onMouseDown={() => {
+                                      this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                  }}
+                                  onMouseUp={() => {
+                                      this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                  }}>
+                                {temp_s.content}
+                            </text>
+                        );
                     }
                     else {
-                        para.push(<Popover content={(
-                            <div>
-                                <div><Input style={{height: 90}} onChange={this.inputOnChange}/></div>
-                                <div><Button onClick={this.postOnClick}>Submit</Button></div>
-                            </div>
-                        )}
-                                           title="New Mark"
-                                           visible={true}
-                        >
-                            <text onMouseDown={() => {
-                                this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
-                            }} onMouseUp={() => {
-                                this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
-                            }} className='sentence' style={{backgroundColor: "yellow"}}>{temp_s.content}</text>
-                        </Popover>);
+                        para.push(
+                            <Popover placement="rightBottom"
+                                     title="New Mark"
+                                     visible={true}
+                                     content={(
+                                         <div>
+                                             <div><Input style={{height: 90}} onChange={this.inputOnChange}/></div>
+                                             <div>
+                                                 <Button onClick={this.postOnClick}>Submit</Button>
+                                                 <Button onClick={this.onCancel}>Cancel</Button>
+                                             </div>
+                                         </div>
+                                     )}
+                            >
+                                <text className='sentence' style={{backgroundColor: "yellow"}}
+                                      onMouseDown={() => {
+                                          this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                      }}
+                                      onMouseUp={() => {
+                                          this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                      }}>
+                                    {temp_s.content}
+                                </text>
+                            </Popover>
+                        );
                     }
 
-
-                    for (let m = 0; m < (temp_s.mark).length; m++) {
-                        if (temp_s.mark[m].end.id ===
-                            temp_s.id) {
+                    for (let m = 0; m < temp_s.mark.length; m++) {
+                        if (temp_s.mark[m].end.id === temp_s.id) {
                             if (this.state.supMarkId === temp_s.mark[m].id) {
-                                para.push(<Popover
-                                    content={(
-                                        <div>
-                                            <div><Input style={{height: 90}} onChange={this.inputOnChange}
-                                                        defaultValue={this.state.marks[("id" + temp_s.mark[m].id)].content}/>
+                                para.push(
+                                    <Popover
+                                        content={(
+                                            <div>
+                                                <div>
+                                                    <Input style={{height: 90}} onChange={this.inputOnChange}
+                                                           defaultValue={this.state.marks[("id" + temp_s.mark[m].id)].content}/>
+                                                </div>
+                                                <div>
+                                                    <Button
+                                                        onClick={() => this.putOnClick(temp_s.mark[m].id)}>Submit</Button>
+                                                    <Button onClick={this.onCancel}>Cancel</Button>
+                                                </div>
                                             </div>
-                                            <div><Button onClick={() => {
-                                                this.putOnClick(temp_s.mark[m].id)
-                                            }}>Submit</Button></div>
-                                        </div>
-                                    )}
-                                    title="Mark"
-                                    visible={true}
-
-                                ><sup onClick={() => {
-                                    this.supOnClick((temp_s.mark)[m].id)
-                                }}>[Mark{m}]</sup></Popover>)
+                                        )}
+                                        placement="rightBottom"
+                                        title="Mark"
+                                        visible={true}
+                                    >
+                                        <sup onClick={() => this.supOnClick((temp_s.mark)[m].id)}>[Mark{m}]</sup>
+                                    </Popover>
+                                );
                             }
                             else {
-                                para.push(<sup onClick={() => {
-                                    this.supOnClick((temp_s.mark)[m].id)
-                                }}>[Mark{m}]</sup>)
+                                para.push(
+                                    <sup onClick={() => this.supOnClick((temp_s.mark)[m].id)}>[Mark{m}]</sup>
+                                );
                             }
                         }
                     }
-
+                }
+                else {
+                    if (this.state.newSentences[1] !== temp_s.id) {
+                        para.push(
+                            <text className='sentence'
+                                  onMouseDown={() => {
+                                      this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                  }}
+                                  onMouseUp={() => {
+                                      this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                  }}>
+                                {temp_s.content}
+                            </text>
+                        );
+                    }
+                    else {
+                        para.push(
+                            <Popover
+                                content={(
+                                    <div>
+                                        <div><Input style={{height: 90}} onChange={this.inputOnChange}/></div>
+                                        <div>
+                                            <Button onClick={this.postOnClick}>Submit</Button>
+                                            <Button onClick={this.onCancel}>Cancel</Button>
+                                        </div>
+                                    </div>
+                                )}
+                                placement="rightBottom"
+                                title="New Mark"
+                                visible={true}
+                            >
+                                <text className='sentence'
+                                      onMouseDown={() => {
+                                          this.onSentenceMouseDown(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                      }}
+                                      onMouseUp={() => {
+                                          this.onSentenceMouseUp(temp_s.id, temp_s.paragraph, temp_s.sequence)
+                                      }}>
+                                    {temp_s.content}
+                                </text>
+                            </Popover>
+                        );
+                    }
                 }
                 j++;
             }
-            contentRender.push(<div>&nbsp;&nbsp;&nbsp;&nbsp;{para}</div>);
+            contentRender.push(<div><p>&nbsp;&nbsp;&nbsp;&nbsp;{para}</p></div>);
             console.log(para);
             i++;
 
-
         }
-        console.log(contentRender);
+        // console.log(contentRender);
         return (
             <div className="HomePage">
+                <h2>{this.state.bookid}&ensp;{this.state.userid}</h2>
                 <div className="content">
                     {
                         contentRender
-                    }{
-                        JSON.stringify(this.state.contentx)
-                }
+                    }
                 </div>
-                <Link to='/'>back to app</Link>
+                {/*<Link to='/'>back to app</Link>*/}
             </div>
         );
     }
 }
 
+Content.defaultProps = {
+    bookid: 1,
+    userid: parseInt(Cookies.get("userid"), 10)
+};
 export default Content;
