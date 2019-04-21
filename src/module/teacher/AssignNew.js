@@ -220,7 +220,7 @@ class AssignNew extends Component {
                 return (
                     <div>
                         <BookPicker value={this.state.bookid} onChange={this.handleBook} allowClear/>
-                        {this.state.bookid.length !== 0 && <Content/>}
+                        {this.state.bookid.length !== 0 && <Content bookid={this.state.bookid}/>}
                     </div>
                 );
             case 2:

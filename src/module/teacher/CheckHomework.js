@@ -21,18 +21,7 @@ class CheckHomework extends Component {
             grade: null,
             toDisplay: false,
         };
-        this.getStudents = this.getStudents.bind(this);
-        this.getHomework = this.getHomework.bind(this);
-        this.getGrade = this.getGrade.bind(this);
 
-        this.handleClass = this.handleClass.bind(this);
-        this.handleHomework = this.handleHomework.bind(this);
-        this.handleStudent = this.handleStudent.bind(this);
-        this.handleComment = this.handleComment.bind(this);
-        this.handleScore = this.handleScore.bind(this);
-        this.handleDisplay = this.handleDisplay.bind(this);
-        this.postGrade = this.postGrade.bind(this);
-        this.renderFilter = this.renderFilter.bind(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -44,7 +33,7 @@ class CheckHomework extends Component {
         }
     }
 
-    getStudents(classid) {
+    getStudents = (classid) => {
         if (classid === undefined || classid === '') {
             message.error("check get students url", 0);
         } else {
@@ -63,9 +52,9 @@ class CheckHomework extends Component {
             };
             request.send();
         }
-    }
+    };
 
-    getHomework(classid) {
+    getHomework = (classid) => {
         if (classid === undefined || classid === '') {
             message.error("check get homeworks url", 0);
         } else {
@@ -84,9 +73,9 @@ class CheckHomework extends Component {
             };
             request.send();
         }
-    }
+    };
 
-    getGrade() {
+    getGrade = () => {
         message.info("get grade");
         let request = new XMLHttpRequest();
         request.open("GET",
@@ -102,10 +91,9 @@ class CheckHomework extends Component {
             }
         };
         request.send();
+    };
 
-    }
-
-    postGrade() {
+    putGrade = () => {
         let msg = window.confirm("是否提交分数？");
         if (msg) {
             let request = new XMLHttpRequest();
@@ -117,9 +105,17 @@ class CheckHomework extends Component {
             request.send(data);
         }
         message.success('Processing complete!');
-    }
+    };
 
-    handleClass(value) {
+    getBookid = (homeworkId) => {
+        for (let i = 0; i < this.state.homeworks.length; i++) {
+            if (this.state.homeworks[i].id === homeworkId) {
+                return this.state.homeworks[i].bookid.id;
+            }
+        }
+    };
+
+    handleClass = (value) => {
         this.setState({
             classId: value,
             students: [],
@@ -132,42 +128,42 @@ class CheckHomework extends Component {
             this.getStudents(value);
             this.getHomework(value);
         }
-    }
+    };
 
-    handleHomework(value) {
+    handleHomework = (value) => {
         this.setState({homeworkId: value, grade: null});
-    }
+    };
 
-    handleStudent(value) {
+    handleStudent = (value) => {
         this.setState({studentId: value, grade: null});
-    }
+    };
 
-    handleComment(e) {
+    handleComment = (e) => {
         let {value} = e.target;
         let newGrade = this.state.grade;
         newGrade.comment = value;
         this.setState({comment: newGrade});
-    }
+    };
 
-    handleScore(value) {
+    handleScore = (value) => {
         let newGrade = this.state.grade;
         newGrade.score = value;
         this.setState({score: newGrade});
-    }
+    };
 
-    handleDisplay(display) {
+    handleDisplay = (display) => {
         this.setState({toDisplay: display});
-    }
+    };
 
-    renderStudentOptions() {
+    renderStudentOptions = () => {
         return this.state.students.map(item => <Option key={item.id} value={item.id}>{item.username}</Option>);
-    }
+    };
 
-    renderHomeworkOptions() {
+    renderHomeworkOptions = () => {
         return this.state.homeworks.map(item => <Option key={item.id} value={item.id}>{item.bookid.title}</Option>);
-    }
+    };
 
-    renderFilter() {
+    renderFilter = () => {
         return (
             <div>
                 <ClassPicker onChange={this.handleClass} value={this.state.classId}
@@ -186,7 +182,7 @@ class CheckHomework extends Component {
                         null
                         :
                         <div>
-                            <Content/>
+                            <Content userid={this.state.studentId} bookid={this.getBookid(this.state.homeworkId)}/>
                             <Divider/>
                             <span style={{verticalAlign: 'top'}}>评语：</span>
                             <TextArea placeholder="评语" size="large" style={{width: 500, marginBottom: 10}}
@@ -199,14 +195,14 @@ class CheckHomework extends Component {
                             <br/>
                             展示：<Switch onChange={this.handleDisplay} style={{marginBottom: 10}}/>
                             <br/>
-                            <Button onClick={this.postGrade} type={"primary"}>
+                            <Button onClick={this.putGrade} type={"primary"}>
                                 rmp send
                             </Button>
                         </div>
                 }
             </div>
         );
-    }
+    };
 
     render() {
         return (
