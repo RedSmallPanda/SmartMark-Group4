@@ -257,6 +257,11 @@ body{
 }
 
 .pageheader{
+
+  font-weight: 800;
+  line-height: 1.5;
+  font-size: 50px;
+  margin-left: 6%;
   background: url("./paper_texture.png");
 }
 .ContentPage{
@@ -275,8 +280,8 @@ body{
 }
 .content{
   margin-top: 10px;
-  width: 82%;
-  margin-left: 9%;
+  width: 60%;
+  margin-left: 20%;
   color: #2f2f2f;
   word-break: break-word!important;
   font-size: 20px;

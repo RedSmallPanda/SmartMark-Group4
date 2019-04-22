@@ -171,7 +171,7 @@ class HeaderMenu extends Component {
                             {
                                 <div>
                                 <Avatar icon="user"
-                                        style={{cursor: "pointer"}}></Avatar>
+                                        ></Avatar>
                                     <text>&nbsp;&nbsp;</text><text className="font-base">&nbsp;&nbsp;{Cookies.get("username")}</text>
                                 </div>
 

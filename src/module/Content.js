@@ -353,7 +353,6 @@ class Content extends Component {
         // console.log(contentRender);
         return (
             <div className="HomePage">
-                <h2>{this.state.bookid}&ensp;{this.state.userid}</h2>
                 <div className="content">
                     {
                         contentRender
