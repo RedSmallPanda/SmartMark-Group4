@@ -46,6 +46,7 @@ class ContentPage extends Component {
             <body className="ContentPage">
             <div >
                 <PageHeader
+                    className="pageheader"
                     onBack={ContentPage.handleBack}
                     title={<h1>{this.state.title}</h1>}
                     subTitle={this.state.info}

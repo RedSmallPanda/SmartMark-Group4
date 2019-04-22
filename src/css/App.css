@@ -256,6 +256,9 @@ body{
   rgba(0, 0, 0, 0.1) inset;
 }
 
+.pageheader{
+  background: url("./paper_texture.png");
+}
 .ContentPage{
 
   width: 100%;
@@ -263,6 +266,13 @@ body{
   min-height: 800px;
 }
 
+.font-base{
+  color: #2f2f2f;
+  word-break: break-word!important;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.7;
+}
 .content{
   margin-top: 10px;
   width: 82%;
