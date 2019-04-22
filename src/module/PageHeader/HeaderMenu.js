@@ -65,6 +65,12 @@ class HeaderMenu extends Component {
         this.handleHomePage();
     };
 
+    handleAdminPage=()=>{
+        window.location.href = '/admin';
+        this.setState({
+            current: "/admin"
+        })
+    }
     handleHomePage = () => {
         window.location.href = '/home';
         this.setState({
@@ -85,7 +91,7 @@ class HeaderMenu extends Component {
                 mode="horizontal"
                 style={{border: 0}}
             >
-
+                <Menu.Item  onClick={this.handleAdminPage}>管理</Menu.Item>
             </Menu>;
         let touristButton =
             <Menu
@@ -160,11 +166,15 @@ class HeaderMenu extends Component {
                                 placeholder="搜索书籍"
                             />
                         </Col>
-                        <Col span={3}/>
-                        <Col span={1}>
+                        <Col span={1}/>
+                        <Col span={3}>
                             {
-                                <Avatar icon="user" onClick={this.handleAvatar}
-                                        style={{cursor: "pointer"}}>{Cookies.get("username")}</Avatar>
+                                <div>
+                                <Avatar icon="user"
+                                        ></Avatar>
+                                    <text>&nbsp;&nbsp;</text><text className="font-base">&nbsp;&nbsp;{Cookies.get("username")}</text>
+                                </div>
+
                             }
                         </Col>
                         <Col span={2}>

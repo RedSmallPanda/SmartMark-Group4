@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Link} from "react-router-dom";
-import {Button, Input, message} from 'antd';
+import {Button, Icon, Input, message} from 'antd';
 import Popover from "antd/es/popover";
 import moment from "moment";
 import Cookies from 'js-cookie';
@@ -240,12 +240,12 @@ class Content extends Component {
                     }
                     else {
                         para.push(
-                            <Popover placement="rightBottom"
+                            <Popover placement="top"
                                      title="New Mark"
                                      visible={true}
                                      content={(
                                          <div>
-                                             <div><Input style={{height: 90}} onChange={this.inputOnChange}/></div>
+                                             <div><Input.TextArea style={{height: 90}} onChange={this.inputOnChange}/></div>
                                              <div>
                                                  <Button onClick={this.postOnClick}>Submit</Button>
                                                  <Button onClick={this.onCancel}>Cancel</Button>
@@ -274,7 +274,7 @@ class Content extends Component {
                                         content={(
                                             <div>
                                                 <div>
-                                                    <Input style={{height: 90}} onChange={this.inputOnChange}
+                                                    <Input.TextArea style={{height: 90}} onChange={this.inputOnChange}
                                                            defaultValue={this.state.marks[("id" + temp_s.mark[m].id)].content}/>
                                                 </div>
                                                 <div>
@@ -284,17 +284,17 @@ class Content extends Component {
                                                 </div>
                                             </div>
                                         )}
-                                        placement="rightBottom"
+                                        placement="top"
                                         title="Mark"
                                         visible={true}
                                     >
-                                        <sup onClick={() => this.supOnClick((temp_s.mark)[m].id)}>[Mark{m}]</sup>
+                                        <sup onClick={() => this.supOnClick((temp_s.mark)[m].id)}>[M]</sup>
                                     </Popover>
                                 );
                             }
                             else {
                                 para.push(
-                                    <sup onClick={() => this.supOnClick((temp_s.mark)[m].id)}>[Mark{m}]</sup>
+                                    <sup onClick={() => this.supOnClick((temp_s.mark)[m].id)}>[M]</sup>
                                 );
                             }
                         }
@@ -319,14 +319,14 @@ class Content extends Component {
                             <Popover
                                 content={(
                                     <div>
-                                        <div><Input style={{height: 90}} onChange={this.inputOnChange}/></div>
+                                        <div><Input.TextArea style={{height: 90}} onChange={this.inputOnChange}/></div>
                                         <div>
                                             <Button onClick={this.postOnClick}>Submit</Button>
                                             <Button onClick={this.onCancel}>Cancel</Button>
                                         </div>
                                     </div>
                                 )}
-                                placement="rightBottom"
+                                placement="top"
                                 title="New Mark"
                                 visible={true}
                             >
@@ -345,7 +345,7 @@ class Content extends Component {
                 }
                 j++;
             }
-            contentRender.push(<div><p>&nbsp;&nbsp;&nbsp;&nbsp;{para}</p></div>);
+            contentRender.push(<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{para}</p></div>);
             console.log(para);
             i++;
 
@@ -353,7 +353,6 @@ class Content extends Component {
         // console.log(contentRender);
         return (
             <div className="HomePage">
-                <h2>{this.state.bookid}&ensp;{this.state.userid}</h2>
                 <div className="content">
                     {
                         contentRender

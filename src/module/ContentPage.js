@@ -43,8 +43,10 @@ class ContentPage extends Component {
 
     render() {
         return (
-            <div className="ContentPage">
+            <body className="ContentPage">
+            <div >
                 <PageHeader
+                    className="pageheader"
                     onBack={ContentPage.handleBack}
                     title={<h1>{this.state.title}</h1>}
                     subTitle={this.state.info}
@@ -52,6 +54,7 @@ class ContentPage extends Component {
                 {this.state.id !== 1 && <Content bookid={this.state.id}/>}
                 <Link to='/'>back to app</Link>
             </div>
+            </body>
         );
     }
 }

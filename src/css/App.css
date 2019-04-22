@@ -256,4 +256,35 @@ body{
   rgba(0, 0, 0, 0.1) inset;
 }
 
+.pageheader{
 
+  font-weight: 800;
+  line-height: 1.5;
+  font-size: 50px;
+  margin-left: 6%;
+  background: url("./paper_texture.png");
+}
+.ContentPage{
+
+  width: 100%;
+  background: url("./paper_texture.png");
+  min-height: 800px;
+}
+
+.font-base{
+  color: #2f2f2f;
+  word-break: break-word!important;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+.content{
+  margin-top: 10px;
+  width: 60%;
+  margin-left: 20%;
+  color: #2f2f2f;
+  word-break: break-word!important;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.7;
+}
