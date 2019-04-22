@@ -127,13 +127,11 @@ class AssignNew extends Component {
             request.send();
         } else {
             if (this.classCount === this.state.classid.length) {
-                message.success("All processed !!!", 0);
-                message.info("You can refresh the page now", 0);
-                // message.destroy();
-                // message.success('Processing complete!', 1);
-                // setTimeout(() => {
-                //     window.location.reload();
-                // }, 1000);
+                message.destroy();
+                message.success("All processed !!!");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             }
         }
     }

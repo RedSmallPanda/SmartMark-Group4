@@ -11,7 +11,7 @@ class Teacher extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            SelectedKeys: '2',//localStorage.getItem('key'),
+            SelectedKeys: '1',//localStorage.getItem('key'),
             OpenKeys: ['sub1', 'sub2']
         };
     }
