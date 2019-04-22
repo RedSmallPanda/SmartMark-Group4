@@ -199,7 +199,7 @@ class FinishedResult extends Component{
         return <div>{this.props.homeworkData.map(item=>{
             let timestamp = new Date(item.homeworkid.deadline).getTime();
             if(timestamp<=this.props.nowTime) {
-                reurn <div><FinishedHomework data={item}/>
+                return <div><FinishedHomework data={item}/>
                     <br/></div>;
                 // else {
                 //     return <div><FinishedHomework data={item}/><br/></div>;
