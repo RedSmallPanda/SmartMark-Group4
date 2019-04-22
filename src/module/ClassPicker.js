@@ -13,8 +13,8 @@ class ClassPicker extends Component {
             value: this.props.value,
             loading: true,
             classes: [],
-            userid: 1555513035954,
-            auth: 'teacher'
+            userid: JSON.parse(Cookies.get("userid")),
+            auth: Cookies.get("auth"),
         };
         this.xmlhttp = new XMLHttpRequest();
         this.getAllClasses = this.getAllClasses.bind(this);
@@ -22,10 +22,9 @@ class ClassPicker extends Component {
     }
 
     componentDidMount() {
-        let role = Cookies.get("auth");
-        if (role === 'admin') {
+        if (this.state.auth === 'admin') {
             this.getAllClasses();
-        } else if (role === 'teacher' || role === 'student') {
+        } else if (this.state.auth === 'teacher' || this.state.auth === 'student') {
             this.getSomeClasses();
         } else {
             message.info("no classes");
@@ -37,8 +36,7 @@ class ClassPicker extends Component {
     }
 
     getSomeClasses() {
-        message.info("get class with fixed teacher");
-        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/1555513035954", true);
+        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/" + this.state.userid, true);
         this.xmlhttp.onreadystatechange = () => {
             if (this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
                 let user = JSON.parse(this.xmlhttp.responseText);
