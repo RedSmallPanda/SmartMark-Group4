@@ -57,7 +57,6 @@ const Register = Form.create()(
 
         register=()=>{
 
-            alert(this.state.username+" pass: "+this.state.password+" calss:"+this.state.classid+"multiclasses : "+this.state.multiclassid)
             if(this.state.username==="" | this.state.password===""){
                 alert("请输入用户名或密码")
                 return;
