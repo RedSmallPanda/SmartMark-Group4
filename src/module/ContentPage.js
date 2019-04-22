@@ -52,7 +52,7 @@ class ContentPage extends Component {
                     subTitle={this.state.info}
                 />
                 {this.state.id !== 1 && <Content bookid={this.state.id}/>}
-                <Link to='/'>back to app</Link>
+                {/*<Link to='/'>back to app</Link>*/}
             </div>
             </body>
         );

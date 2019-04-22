@@ -14,7 +14,7 @@ const Register = Form.create()(
                 username:"",
                 password:"",
                 classid:"",
-                multiclassid:"",
+                multiclassid:[],
                 auth:"tourist",
                 Classes: [],
                 confirmDirty: false,
@@ -50,7 +50,7 @@ const Register = Form.create()(
                 classid:"",
                 auth:"student",
                 Classes: [],
-                multiclassid:"",
+                multiclassid:[],
                 confirmDirty: false,
             })
         }
@@ -134,7 +134,7 @@ const Register = Form.create()(
             this.setState({
                 auth:e,
                 classid:"",
-                multiclassid:"",
+                multiclassid:[],
             })
         }
         selectmulticlass=(e)=>{
