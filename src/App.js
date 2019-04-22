@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
-import {BrowserRouter, Link, Route} from "react-router-dom";
+import {BrowserRouter, Route} from "react-router-dom";
 import Cookies from "js-cookie"
 import LoginReg from "./module/loginReg/LoginReg"
 import HeaderMenu from "./module/PageHeader/HeaderMenu";
@@ -11,29 +10,28 @@ import ContentPage from "./module/ContentPage";
 import SearchResult from "./module/SearchResult";
 import MyHomework from "./module/MyHomework"
 import AdminSpace from "./module/AdminSpace"
+
 class App extends Component {
     state = {
         isLogin: false,
         isAdmin: false,
-        auth:"",
+        auth: "",
     };
 
     constructor(props) {
         super(props);
         this.xmlhttp = new XMLHttpRequest();
-        this.postResource = this.postResource.bind(this);
-        this.homePage = this.homePage.bind(this);
     }
 
     componentWillMount() {
         let username = Cookies.get('username');
-        let tempauth=Cookies.get('auth');
-        if (typeof(tempauth) !== "undefined" && tempauth !== ''){
+        let tempauth = Cookies.get('auth');
+        if (typeof(tempauth) !== "undefined" && tempauth !== '') {
             this.setState({
-                auth:tempauth
+                auth: tempauth
             })
         }
-            if (typeof(username) !== "undefined" && username !== '') {
+        if (typeof(username) !== "undefined" && username !== '') {
             if (username === "admin") {
                 this.setState({
                     isLogin: true,
@@ -47,17 +45,6 @@ class App extends Component {
             }
         }
     }
-    postResource() {
-        let msg = window.confirm("将发送测试数据到 RMP，谨慎！");
-        if (msg) {
-            this.xmlhttp.open("POST", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/", true);
-            this.xmlhttp.setRequestHeader("Content-Type","application/json");
-            let data = JSON.stringify({
-                "sentencecontent": "test value"
-            });
-            this.xmlhttp.send(data);
-        }
-    }
 
     handleLogin(loginState) {
         console.log("log state:");
@@ -65,15 +52,7 @@ class App extends Component {
         this.setState(loginState);
     }
 
-
-
-    homePage(){
-
-    }
-
     render() {
-        let username=Cookies.get("username");
-        const p=<p>{username}</p>
         return (
             <div>
                 <HeaderMenu
@@ -85,13 +64,13 @@ class App extends Component {
                           handleLogin={this.handleLogin.bind(this)}/>
                 <BrowserRouter>
 
-                    <Route exact path='/' component={HomePage} />
-                    <Route path='/home' component={HomePage} />
-                    <Route path='/content' component={ContentPage} />
-                    <Route path='/search' component={SearchResult} />
-                    <Route path='/teacher' component={Teacher} />
-                    <Route path='/homework' component={MyHomework} />
-                    <Route path='/admin' component={AdminSpace} />
+                    <Route exact path='/' component={HomePage}/>
+                    <Route path='/home' component={HomePage}/>
+                    <Route path='/content' component={ContentPage}/>
+                    <Route path='/search' component={SearchResult}/>
+                    <Route path='/teacher' component={Teacher}/>
+                    <Route path='/homework' component={MyHomework}/>
+                    <Route path='/admin' component={AdminSpace}/>
                 </BrowserRouter>
             </div>
         );

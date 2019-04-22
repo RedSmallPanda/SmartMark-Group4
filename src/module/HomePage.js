@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {Card, Row, Col, Divider} from 'antd';
 import Button from "antd/es/button/button";
+import ClassPicker from "./ClassPicker";
+import moment from "moment";
 
 const testImg = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1555149598771&di=cc9731ab518cf536911ef138782ec329&imgtype=0&src=http%3A%2F%2Fwww.kfzimg.com%2FG06%2FM00%2FD0%2FCC%2Fp4YBAFq49ZuAGMHzAAEH07dRn8A748_b.jpg";
 const { Meta } = Card;
@@ -45,19 +47,23 @@ class HomePage extends Component {
         if(this.xmlhttp.readyState === 4 && this.xmlhttp.status === 200) {
             alert(this.xmlhttp.responseText);
         }
-
     }
+    
     postResource() {
-        this.xmlhttp.open("GET", "http://47.103.7.215:8080/Entity/U13c635fa1f5c90/SmartMark/Sentence/?Sentence.content=(like)est", true);
-        // this.xmlhttp.open("GET", "http://www.baidu.com", true);
+        // this.xmlhttp.open("PUT", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/1555513545420", true);
         // this.xmlhttp.setRequestHeader("Content-Type","application/json");
         // let data = JSON.stringify({
-        //     "content": "test",
+        // });
+        // this.xmlhttp.onreadystatechange = this.callback;
+        // this.xmlhttp.send(data);
+
+        this.xmlhttp.open("DELETE", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Homework/1555513545420", true);
+        // this.xmlhttp.setRequestHeader("Content-Type","application/json");
+        // let data = JSON.stringify({
+        //     url: "啦啦啦啦啦啦啦啦啦",
         // });
         this.xmlhttp.onreadystatechange = this.callback;
         this.xmlhttp.send();
-
-        // this.xmlhttp.send(data);
     }
 
     handleMouseOver(id) {
@@ -106,7 +112,8 @@ class HomePage extends Component {
                 </Col>
                 <Col span={4}/>
                 <Divider/>
-                <Button type={"primary"} onClick={this.postResource}>Dangerous button</Button>
+                {/*<Button type={"primary"} onClick={this.postResource}>Dangerous button</Button>*/}
+
             </div>
         );
     }
