@@ -7,17 +7,9 @@ const columns = [{
     key: 'id',
 }, {
     title: '批注',
-    dataIndex: 'mark',
+    dataIndex: 'content',
     key: 'mark',
-},  {
-    title: '操作',
-    key: 'action',
-    render: (text, record) => (
-        <span>
-      <a href="javascript:;">删除</a>
-    </span>
-    ),
-}];
+},];
 
 const data = [{
     key: '1',
@@ -34,9 +26,30 @@ const data = [{
 }];
 
 class MarkManage extends Component {
+    constructor(props){
+        super(props);
+        this.state={
+            data:[],
+        }
+    }
+
+    componentDidMount(){
+        let newHttp=new XMLHttpRequest();
+        newHttp.open("GET", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Mark/", true);
+        newHttp.onreadystatechange=()=>{
+            if(newHttp.readyState === 4 && newHttp.status === 200) {
+                let markData = JSON.parse(newHttp.responseText).hasOwnProperty("Mark") ? JSON.parse(newHttp.responseText).Mark : [];
+                this.setState({
+                    data:markData,
+                });
+            }
+        }
+        newHttp.send();
+    }
+
     render(){
         let userTable = <div>
-            <Table columns={columns} dataSource={data} />
+            <Table columns={columns} dataSource={this.state.data} />
         </div>;
         return(
             userTable

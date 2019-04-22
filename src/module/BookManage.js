@@ -162,22 +162,30 @@ class BookManage extends Component {
                     "sequence":seq,
                     "bookid": {"id":data.id},
                 };
+                count++;
+                if(seq<stAmount[para]-1){
+                    seq++;
+                }
+                else{
+                    para++;
+                    seq=0;
+                }
                 sentencehttp.onreadystatechange = () =>{
                     if(sentencehttp.readyState === 4 && sentencehttp.status === 200 && count < allAmount){
-                        count++;
-                        if(seq<stAmount[para]){
-                            seq++;
-                        }
-                        else{
-                            para++;
-                            seq=0;
-                        }
                         sentenceData = {
                             "content": stVec[para][seq],
                             "paragraph":para,
                             "sequence":seq,
                             "bookid": {"id":data.id},
                         };
+                        count++;
+                        if(seq<stAmount[para]-1){
+                            seq++;
+                        }
+                        else{
+                            para++;
+                            seq=0;
+                        }
                         sentencehttp.open("POST", "http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Sentence/", true);
                         sentencehttp.setRequestHeader("Content-Type", "application/json");
                         sentencehttp.send(JSON.stringify(sentenceData));
@@ -253,7 +261,7 @@ class BookManage extends Component {
                     strVec.push(paraVec);
                 }
                 //let n=reader.result.split(".");
-                //console.log(strVec);
+                console.log(strVec);
             }
         }
         this.setState({sentenceVec:strVec});
