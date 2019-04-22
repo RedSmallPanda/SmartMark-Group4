@@ -72,7 +72,7 @@ const Login = Form.create()(
                     maskClosable={false}
                     destroyOnClose={true}
                     width="400px"
-
+                    closable={false}
                 >
                     <div className="padding">
                         <p className="letters">请登录</p>
