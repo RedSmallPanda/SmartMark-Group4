@@ -6,6 +6,9 @@
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest"
   },
+  "plugins": [
+    ["import", { "libraryName": "antd-mobile", "style": "css" }]
+  ],
   "dependencies": {
     "react": "16.8.3",
     "react-native": "0.59.5"
