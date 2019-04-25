@@ -9,6 +9,7 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 import {Icon, TabBar} from '@ant-design/react-native';
+import Teacher from "./modules/teacher/Teacher";
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -46,15 +47,17 @@ export default class App extends Component<Props> {
                     <View style={styles.container}>
                         <Text style={styles.welcome}>Smart Mark APP</Text>
                         <Text style={styles.welcome}>Welcome to React Native!</Text>
-                    </View>
-                </TabBar.Item>
-                <TabBar.Item title="Instruction" icon={<Icon name="home"/>}
-                             selected={this.state.selectedTab === 'instructionTab'}
-                             onPress={() => this.onChangeTab('instructionTab')}
-                >
-                    <View style={styles.container}>
                         <Text style={styles.instructions}>To get started, edit App.js</Text>
                         <Text style={styles.instructions}>{instructions}</Text>
+                        <Text style={styles.instructions}>To send request, see Homework Tab</Text>
+                    </View>
+                </TabBar.Item>
+                <TabBar.Item title="Homework" icon={<Icon name="profile"/>}
+                             selected={this.state.selectedTab === 'Tab2'}
+                             onPress={() => this.onChangeTab('Tab2')}
+                >
+                    <View style={styles.container}>
+                        <Teacher/>
                     </View>
                 </TabBar.Item>
             </TabBar>
