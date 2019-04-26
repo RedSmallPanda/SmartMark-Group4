@@ -32,11 +32,13 @@ export default class HomePage extends Component<Props> {
                 if (responseJson.hasOwnProperty("Cover")) {
                     this.setState({
                         searched: true,
+                        toSearch: true,
                         data: responseJson.Cover
                     })
                 } else {
                     this.setState({
                         searched: true,
+                        toSearch: true,
                         data: []
                     })
                 }
