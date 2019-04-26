@@ -10,6 +10,8 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 import {Icon, TabBar} from '@ant-design/react-native';
 import Teacher from "./modules/teacher/Teacher";
+import HomePage from "./modules/home/HomePage";
+import Badge from "@ant-design/react-native/es/badge";
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -40,24 +42,31 @@ export default class App extends Component<Props> {
                 tintColor="#33A3F4"
                 barTintColor="#f5f5f5"
             >
-                <TabBar.Item title="Home" icon={<Icon name="home"/>}
-                             selected={this.state.selectedTab === 'homeTab'}
-                             onPress={() => this.onChangeTab('homeTab')}
+                <TabBar.Item
+                    title="Home" icon={<Icon name="home"/>}
+                    selected={this.state.selectedTab === 'homeTab'}
+                    onPress={() => this.onChangeTab('homeTab')}
                 >
                     <View style={styles.container}>
-                        <Text style={styles.welcome}>Smart Mark APP</Text>
-                        <Text style={styles.welcome}>Welcome to React Native!</Text>
-                        <Text style={styles.instructions}>To get started, edit App.js</Text>
-                        <Text style={styles.instructions}>{instructions}</Text>
-                        <Text style={styles.instructions}>To send request, see Homework Tab</Text>
+                        <HomePage/>
                     </View>
                 </TabBar.Item>
-                <TabBar.Item title="Homework" icon={<Icon name="profile"/>}
-                             selected={this.state.selectedTab === 'Tab2'}
-                             onPress={() => this.onChangeTab('Tab2')}
+                <TabBar.Item
+                    title="Homework" icon={<Icon name="profile"/>}
+                    selected={this.state.selectedTab === 'homeworkTab'}
+                    onPress={() => this.onChangeTab('homeworkTab')}
                 >
                     <View style={styles.container}>
                         <Teacher/>
+                    </View>
+                </TabBar.Item>
+                <TabBar.Item
+                    title="Settings" icon={<Icon name="setting"/>}
+                    selected={this.state.selectedTab === 'settingsTab'}
+                    onPress={() => this.onChangeTab('settingsTab')}
+                >
+                    <View style={styles.container}>
+                        <Text>Something</Text>
                     </View>
                 </TabBar.Item>
             </TabBar>
