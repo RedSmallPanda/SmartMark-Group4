@@ -7,88 +7,71 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
-import {Icon, TabBar} from '@ant-design/react-native';
-import Teacher from "./modules/teacher/Teacher";
+import {
+    createAppContainer,
+    createSwitchNavigator,
+    createStackNavigator,
+    createBottomTabNavigator,
+} from "react-navigation";
+import TestAuthScreen from "./modules/TestAuthScreen";
+import TestContentScreen from "./modules/TestContentScreen";
 import HomePage from "./modules/home/HomePage";
-import Badge from "@ant-design/react-native/es/badge";
+import Teacher from "./modules/teacher/Teacher";
+import Settings from "./modules/Settings";
+import {Icon} from "@ant-design/react-native";
 
-const instructions = Platform.select({
-    ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-    android:
-        'Double tap R on your keyboard to reload,\n' +
-        'Shake or press menu button for dev menu',
-});
-
-type Props = {};
-export default class App extends Component<Props> {
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedTab: 'homeTab',
-        };
+const BottomTabNavigator = createBottomTabNavigator(
+    {
+        Home: {
+            screen: HomePage,
+            navigationOptions: {
+                tabBarLabel: "Home",
+                tabBarIcon: ({focused, tintColor}) => (<Icon name='home' color={tintColor}/>),
+            },
+        },
+        Homework: {
+            screen: Teacher,
+            navigationOptions: {
+                tabBarLabel: "Homework",
+                tabBarIcon: ({focused, tintColor}) => (<Icon name='profile' color={tintColor}/>),
+            },
+        },
+        Setting: {
+            screen: Settings,
+            navigationOptions: {
+                tabBarLabel: "Settings",
+                tabBarIcon: ({focused, tintColor}) => (<Icon name='setting' color={tintColor}/>),
+            },
+        },
+    },
+    {
+        initialRouteName: 'Home'
     }
-
-    onChangeTab(tabName) {
-        this.setState({
-            selectedTab: tabName,
-        });
+);
+BottomTabNavigator.navigationOptions = {header: null};
+const MainNavigator = createStackNavigator(
+    {
+        MainPage: BottomTabNavigator,
+        Content: TestContentScreen
+    },
+    {
+        initialRouteName: 'MainPage'
     }
+);
+const AppNavigator = createSwitchNavigator(
+    {
+        App: MainNavigator,
+        Auth: TestAuthScreen
+    },
+    {
+        initialRouteName: 'Auth'
+    }
+);
+const AppContainer = createAppContainer(AppNavigator);
 
+export default class App extends Component {
     render() {
-        return (
-            <TabBar
-                unselectedTintColor="#949494"
-                tintColor="#33A3F4"
-                barTintColor="#f5f5f5"
-            >
-                <TabBar.Item
-                    title="Home" icon={<Icon name="home"/>}
-                    selected={this.state.selectedTab === 'homeTab'}
-                    onPress={() => this.onChangeTab('homeTab')}
-                >
-                    <View style={styles.container}>
-                        <HomePage/>
-                    </View>
-                </TabBar.Item>
-                <TabBar.Item
-                    title="Homework" icon={<Icon name="profile"/>}
-                    selected={this.state.selectedTab === 'homeworkTab'}
-                    onPress={() => this.onChangeTab('homeworkTab')}
-                >
-                    <View style={styles.container}>
-                        <Teacher/>
-                    </View>
-                </TabBar.Item>
-                <TabBar.Item
-                    title="Settings" icon={<Icon name="setting"/>}
-                    selected={this.state.selectedTab === 'settingsTab'}
-                    onPress={() => this.onChangeTab('settingsTab')}
-                >
-                    <View style={styles.container}>
-                        <Text>Something</Text>
-                    </View>
-                </TabBar.Item>
-            </TabBar>
-        );
+        return <AppContainer/>;
     }
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-    welcome: {
-        fontSize: 20,
-        textAlign: 'center',
-        margin: 10,
-    },
-    instructions: {
-        textAlign: 'center',
-        color: '#333333',
-        marginBottom: 5,
-    },
-});
