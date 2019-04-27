@@ -71,7 +71,12 @@ export default class HomePage extends Component<Props> {
                             data={this.state.data}
                         />
                         :
-                        <Text>home page</Text>
+                        <Text onPress={() => this.props.navigation.navigate(
+                            'Content',
+                            {bookId: 1555942146453}
+                        )}>
+                            to content
+                        </Text>
                 }
             </View>
         );
