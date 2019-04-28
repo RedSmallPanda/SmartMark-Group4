@@ -17,6 +17,7 @@ import TestAuthScreen from "./modules/TestAuthScreen";
 import TestContentScreen from "./modules/TestContentScreen";
 import HomePage from "./modules/home/HomePage";
 import Teacher from "./modules/teacher/Teacher";
+import StudentHomework from "./modules/Student/StudentHomework";
 import Settings from "./modules/Settings";
 import {Icon} from "@ant-design/react-native";
 
@@ -30,7 +31,7 @@ const BottomTabNavigator = createBottomTabNavigator(
             },
         },
         Homework: {
-            screen: Teacher,
+            screen: StudentHomework,
             navigationOptions: {
                 tabBarLabel: "Homework",
                 tabBarIcon: ({focused, tintColor}) => (<Icon name='profile' color={tintColor}/>),
