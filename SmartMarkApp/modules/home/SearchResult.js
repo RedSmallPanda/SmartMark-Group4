@@ -19,6 +19,7 @@ export default class SearchResult extends Component<Props> {
     }
 
     render() {
+        const {onNavigate} = this.props;
         return (
             this.state.searched ?
                 <View style={{width: '100%', flex: 1}}>
@@ -26,7 +27,9 @@ export default class SearchResult extends Component<Props> {
                     <FlatList
                         data={this.state.data}
                         renderItem={({item, index, separators}) =>
-                            <Item key={item.id}>
+                            <Item key={item.id}
+                                  onPress={() => onNavigate(item.bookid.id)}
+                            >
                                 <View style={{flexDirection: 'row'}}>
                                     <Image
                                         key={item.id}
