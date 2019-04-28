@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {SearchBar} from "@ant-design/react-native";
 import SearchResult from "./SearchResult";
+import Icon from "@ant-design/react-native/es/icon";
 
 type Props = {};
 export default class HomePage extends Component<Props> {
@@ -12,6 +13,7 @@ export default class HomePage extends Component<Props> {
             searched: false,
             search: '',
             data: [],
+            showHistory: true,
         };
     }
 
@@ -51,6 +53,18 @@ export default class HomePage extends Component<Props> {
         this.setState({toSearch: true})
     };
 
+    onNavigate(bookId) {
+        this.props.navigation.navigate(
+            'Content',
+            {bookId: bookId}
+        );
+    }
+
+    hideHistory = (e) => {
+        e.preventDefault();
+        this.setState({showHistory: false})
+    };
+
     render() {
         return (
             <View style={{width: '100%', flex: 1}}>
@@ -69,16 +83,38 @@ export default class HomePage extends Component<Props> {
                             searched={this.state.searched}
                             search={this.state.search}
                             data={this.state.data}
+                            onNavigate={this.onNavigate.bind(this)}
                         />
                         :
-                        <Text onPress={() => this.props.navigation.navigate(
-                            'Content',
-                            {bookId: 1555942146453}
-                        )}>
-                            to content
-                        </Text>
+                        <View>
+                            {
+                                this.state.showHistory
+                                &&
+                                <Text style={styles.column}
+                                      onPress={() => this.onNavigate(1555942146453)}>
+                                    上次阅读&ensp;
+                                    <Text style={{fontSize: 15, flex: 1}}>title</Text>
+                                    <Icon name='close' onPress={this.hideHistory}/>
+                                </Text>
+                            }
+                            <Text style={styles.column}>为你推荐</Text>
+                            <View style={{flex: 1, flexDirection: 'row', textAlign: 'center'}}>
+                                <View style={{flex: 1, height: 100, backgroundColor: '#eee'}}/>
+                                <View style={{flex: 1, height: 100, backgroundColor: '#ddd'}}/>
+                                <View style={{flex: 1, height: 100, backgroundColor: '#eee'}}/>
+                            </View>
+                        </View>
                 }
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    column: {
+        fontSize: 20,
+        textAlign: 'left',
+        margin: 10,
+        flexDirection: 'row',
+    },
+});
