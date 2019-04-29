@@ -1,5 +1,11 @@
 import React, {Component} from "react";
-import {Text, ScrollView} from "react-native";
+import {Text, ScrollView,View,Image,StyleSheet,ImageBackground,Modal} from "react-native";
+
+import Popover from "@ant-design/react-native/es/popover";
+import Button from "@ant-design/react-native/es/button";
+import {List} from "@ant-design/react-native";
+import TextAreaItem from "@ant-design/react-native/es/textarea-item";
+
 
 type Props = {};
 export default class TestContentScreen extends Component<Props> {
@@ -16,6 +22,7 @@ export default class TestContentScreen extends Component<Props> {
             userid: 1555599840309,
             marks: [],
             content: {},
+            supMarkId: 0,
         };
     }
 
@@ -112,20 +119,114 @@ export default class TestContentScreen extends Component<Props> {
         return sorted;
     };
 
+
+    onCancel = () => {
+        this.setState({
+            supMarkId: 0,
+
+        })
+    };
+    supOnClick = (markId) => {
+        this.onCancel();
+        this.setState({supMarkId: markId});
+    };
     render() {
+
+
+        let contentRender = [];
+        let i = 0;
+
+        let modalvalue="";
+        while (this.state.content.hasOwnProperty("p" + i)) {
+            let temp_p = this.state.content["p" + i];
+            let para = [];
+            let j = 0;
+            while (temp_p.hasOwnProperty("s" + j)) {
+                let temp_s = this.state.content["p" + i]["s" + j];
+                if (temp_s.mark.length > 0) {
+
+                        para.push(
+                            <Text className='sentence' style={{backgroundColor: "#a2d2cb"
+                                ,color: '#2f2f2f',fontSize:20}}
+
+                                  >
+                                {temp_s.content}
+                            </Text>
+                        );
+
+
+                    for (let m = 0; m < temp_s.mark.length; m++) {
+                        if (temp_s.mark[m].end.id === temp_s.id) {
+                            if (this.state.supMarkId === temp_s.mark[m].id) {
+                                para.push(
+                                        <Text style={{color: "blue"}} onPress={() => this.supOnClick((temp_s.mark)[m].id)}>[M]</Text>
+                                );
+                                modalvalue=this.state.marks[("id" + temp_s.mark[m].id)].content;
+                            }
+                            else {
+                                para.push(
+                                    <Text style={{color: "red"}} onPress={() => this.supOnClick((temp_s.mark)[m].id)}>[M]</Text>
+                                );
+                            }
+                        }
+                    }
+                }
+                else {
+
+                        para.push(
+                            <Text className='sentence'
+                                  style={{
+                                      fontSize: 20
+                                  }}
+                                 >
+                                {temp_s.content}
+                            </Text>
+                        );
+
+
+                }
+                j++;
+            }
+            contentRender.push(<View ><Text>&ensp;&ensp;&ensp;&ensp;{para}</Text></View>);
+
+           // console.log(para);
+            i++;
+
+        }
+        if(this.state.supMarkId!==0) {
+            contentRender.push(<View style={{flex: 1}}>
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.supMarkId !== 0}
+                    onRequestClose={() => {
+                        this.onCancel();
+                    }}
+                >
+
+                    <View style={{marginTop:'50%',margin:50}}>
+                        <List renderHeader="批注">
+                            <TextAreaItem editable={false} value={modalvalue}/>
+                        </List>
+                        <Button  onPress={this.onCancel}>关闭 </Button>
+                    </View>
+                </Modal></View>)
+        }
+
+
+
         return (
+            <ImageBackground style={{flex:1}} source={require('./paper_texture.png')}>
             <ScrollView
-                style={{
-                    flex: 1,
-                    // justifyContent: 'center',
-                    // alignItems: 'center',
-                    backgroundColor: '#F5FCFF',
-                }}
+
             >
                 <Text>content</Text>
                 <Text>{`book id: ${this.props.navigation.state.params.bookId}`}</Text>
-                <Text>{JSON.stringify(this.state.content)}</Text>
+                {/*<Text>{JSON.stringify(this.state.content)}</Text>*/}
+                {contentRender}
+
             </ScrollView>
+            </ImageBackground>
         );
     }
 };
