@@ -172,6 +172,9 @@ export default class HomePage extends Component<Props> {
                     onFocus={this.onFocus}
                     // showCancelButton
                 />
+
+
+
                 {
                     this.state.toSearch ?
                         <SearchResult

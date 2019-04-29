@@ -20,6 +20,7 @@ import Teacher from "./modules/teacher/Teacher";
 import StudentHomework from "./modules/Student/StudentHomework";
 import Settings from "./modules/Settings";
 import {Icon} from "@ant-design/react-native";
+import MyLogin from "./modules/loginReg/MyLogin"
 
 const BottomTabNavigator = createBottomTabNavigator(
     {
