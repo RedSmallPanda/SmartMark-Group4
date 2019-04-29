@@ -65,6 +65,101 @@ export default class HomePage extends Component<Props> {
         this.setState({showHistory: false})
     };
 
+    componentDidMount() {
+        fetch("http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Cover/")
+            .then((response) => response.json())
+            .then((responseJson) => {
+                let coverData = responseJson.hasOwnProperty("Cover") ? responseJson.Cover : [];
+
+                fetch("http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/Mark/")
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        let markData = responseJson.hasOwnProperty("Mark") ? responseJson.Mark : [];
+                        console.log(markData);
+                        let bookList = {};
+                        // if (Cookies.get("userid") == null) {
+                        //     return;
+                        // }
+                        //let ckUID = parseInt(Cookies.get("userid"));
+                        let ckUID=1555599840309;
+                        for (let mark in markData) { //这个语法对吗？
+                            console.log(mark);
+                            if (markData[mark].userid.id === ckUID) {
+                                bookList["id" + markData[mark].bookid.id] = 1;
+                            }
+                        }
+                        let similarUser = {};
+                        for (let mark in markData) {
+                            if (markData[mark].userid.id !== ckUID) {
+                                if (!similarUser.hasOwnProperty("id" + markData[mark].userid.id)) {
+                                    similarUser["id" + markData[mark].userid.id] = {count: 0, books: []};
+                                }
+                                if (bookList.hasOwnProperty("id" + markData[mark].bookid.id)) {
+                                    similarUser["id" + markData[mark].userid.id].count++;
+                                }
+                                similarUser["id" + markData[mark].userid.id].books.push(markData[mark].bookid);
+                            }
+                        }
+
+                        let mostSimilarUser = [];
+                        for (var user in similarUser) {
+                            mostSimilarUser.push({
+                                userId: user, //key
+                                userCount: similarUser[user].count,
+                            });
+                        }
+
+
+                        mostSimilarUser.sort((a, b) => {
+                            return b.userCount - a.userCount;
+                        });
+                        console.log(mostSimilarUser);
+                        let bookRes = [];
+                        let bookNum = 0;
+                        let uid;
+                        for (let i = 0; i < mostSimilarUser.length; i++) {
+                            if (bookNum >= 5) {
+                                break;
+                            }
+                            uid = mostSimilarUser[i].userId;
+                            let tempBooks = {};
+                            for (let book in similarUser[uid].books) {
+                                if (!tempBooks.hasOwnProperty("id" + similarUser[uid].books[book].id)) {
+                                    if (bookNum >= 5) {
+                                        break;
+                                    }
+                                    tempBooks["id" + similarUser[uid].books[book].id] = similarUser[uid].books[book];
+                                    bookRes.push(similarUser[uid].books[book]);
+                                    bookNum++;
+                                }
+                            }
+
+                        }
+                        let cvData = coverData;
+                        let coverRes = [];
+                        for (let book in bookRes) {
+                            for (let cover in cvData) {
+                                if (cvData[cover].bookid.id === bookRes[book].id) {
+                                    coverRes.push(cvData[cover]);
+                                }
+                            }
+                        }
+
+                        console.log(coverRes);
+                        this.setState({
+                            data: coverRes,
+                        });
+                })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+        })
+            .catch((error) => {
+                console.error(error);
+            });
+
+    }
+
     render() {
         return (
             <View style={{width: '100%', flex: 1}}>
@@ -103,6 +198,7 @@ export default class HomePage extends Component<Props> {
                                 <View style={{flex: 1, height: 100, backgroundColor: '#ddd'}}/>
                                 <View style={{flex: 1, height: 100, backgroundColor: '#eee'}}/>
                             </View>
+                            <View><Text>测试测试{JSON.stringify(this.state.data)}</Text></View>
                         </View>
                 }
             </View>
