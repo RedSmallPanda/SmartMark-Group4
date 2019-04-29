@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View,AsyncStorage} from 'react-native';
 import {List, InputItem, Button,} from "@ant-design/react-native";
-import {classes} from "istanbul-lib-coverage";
+
 
 type Props = {};
 export default class MyLogin extends Component<Props> {
@@ -108,7 +108,7 @@ export default class MyLogin extends Component<Props> {
                 </List>
                 <Text>info   : {this.state.info}</Text>
                 <Button type="primary" size={'large'} style={{margin:10}} onPress={this.onSubmit}>登录</Button>
-                <Button type="primary" size={'large'} style={{margin:10}} onPress={this.getCookie}>注册</Button>
+                <Button type="primary" size={'large'} style={{margin:10}} onPress={this.props.onLogin}>注册</Button>
             </View>
         );
     }
