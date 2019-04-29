@@ -2,11 +2,8 @@ import React, {Component} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {SearchBar} from "@ant-design/react-native";
 import SearchResult from "./SearchResult";
-<<<<<<< HEAD
-import MyLogin from "../loginReg/MyLogin";
-=======
 import Icon from "@ant-design/react-native/es/icon";
->>>>>>> c79e585ece23c0a682acd779b8dedf69c930682a
+
 
 type Props = {};
 export default class HomePage extends Component<Props> {

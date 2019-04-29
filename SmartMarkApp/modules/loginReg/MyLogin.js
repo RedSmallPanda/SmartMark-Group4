@@ -17,11 +17,20 @@ export default class MyLogin extends Component<Props> {
         };
     }
 
+    componentDidMount(){
+        this.clear();
+        this.CookieClear();
+    }
+
     toReg=()=>{
         this.setState({
             info:"denglu"
         })
     }
+    CookieClear=async ()=>{
+        await AsyncStorage.clear();
+    }
+
     clear = () => {
         this.setState({usernmae: '', password: "",auth:""})
     };
@@ -35,6 +44,7 @@ export default class MyLogin extends Component<Props> {
     getCookie=async ()=>{
         await  AsyncStorage.getItem("classes",(error,class_str)=>{
             let classes=JSON.parse(class_str);
+            if(!classes){return}
             this.setState({
                 info: "get class id from storage: "+classes[0].id
             })
@@ -47,7 +57,12 @@ export default class MyLogin extends Component<Props> {
             info:"username: "+this.state.username
         })
 
-        if(this.state.username===""||this.state.password===""){return}
+        if(this.state.username===""||this.state.password===""){
+            this.setState({
+                info: "请输入用户名密码"
+            });
+            return;
+        }
         fetch("http://47.103.7.215:8080/Entity/U65af91833eaa4/SmartMark3/User/?User.username="+this.state.username+"&"+"User.password="+this.state.password )
             .then((response) => response.json())
             .then((responseJson) => {
@@ -91,7 +106,7 @@ export default class MyLogin extends Component<Props> {
                     }}>
                     </InputItem>
                 </List>
-                <Text>debug info   : {this.state.info}</Text>
+                <Text>info   : {this.state.info}</Text>
                 <Button type="primary" size={'large'} style={{margin:10}} onPress={this.onSubmit}>登录</Button>
                 <Button type="primary" size={'large'} style={{margin:10}} onPress={this.getCookie}>注册</Button>
             </View>

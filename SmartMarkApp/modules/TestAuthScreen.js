@@ -26,9 +26,6 @@ export default class TestAuthScreen extends Component<Props> {
                 <MyLogin
                     onLogin={this.onLogin}
                 />
-                <Text onPress={() => this.props.navigation.navigate('App')}>
-                    Press me!!!!!!
-                </Text>
             </View>
         );
     }
