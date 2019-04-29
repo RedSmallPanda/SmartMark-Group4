@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {SearchBar} from "@ant-design/react-native";
+import {StyleSheet, Text, View, Image, ScrollView} from 'react-native';
+import {SearchBar, WhiteSpace, Icon} from "@ant-design/react-native";
 import SearchResult from "./SearchResult";
-import Icon from "@ant-design/react-native/es/icon";
 
 type Props = {};
 export default class HomePage extends Component<Props> {
@@ -12,13 +11,14 @@ export default class HomePage extends Component<Props> {
             toSearch: false,
             searched: false,
             search: '',
+            searchData: [],
             data: [],
             showHistory: true,
         };
     }
 
     onChange = (value) => {
-        this.setState({search: value})
+        this.setState({search: value, toSearch: value !== ''})
     };
     clear = () => {
         this.setState({search: '', toSearch: false})
@@ -35,13 +35,13 @@ export default class HomePage extends Component<Props> {
                     this.setState({
                         searched: true,
                         toSearch: true,
-                        data: responseJson.Cover
+                        searchData: responseJson.Cover
                     })
                 } else {
                     this.setState({
                         searched: true,
                         toSearch: true,
-                        data: []
+                        searchData: []
                     })
                 }
             })
@@ -53,12 +53,12 @@ export default class HomePage extends Component<Props> {
         this.setState({toSearch: true})
     };
 
-    onNavigate(bookId) {
+    onNavigate = (bookId) => {
         this.props.navigation.navigate(
             'Content',
             {bookId: bookId}
         );
-    }
+    };
 
     hideHistory = (e) => {
         e.preventDefault();
@@ -81,7 +81,7 @@ export default class HomePage extends Component<Props> {
                         //     return;
                         // }
                         //let ckUID = parseInt(Cookies.get("userid"));
-                        let ckUID=1555599840309;
+                        let ckUID = 1555599840309;
                         for (let mark in markData) { //这个语法对吗？
                             console.log(mark);
                             if (markData[mark].userid.id === ckUID) {
@@ -102,7 +102,7 @@ export default class HomePage extends Component<Props> {
                         }
 
                         let mostSimilarUser = [];
-                        for (var user in similarUser) {
+                        for (let user in similarUser) {
                             mostSimilarUser.push({
                                 userId: user, //key
                                 userCount: similarUser[user].count,
@@ -149,27 +149,56 @@ export default class HomePage extends Component<Props> {
                         this.setState({
                             data: coverRes,
                         });
-                })
+                    })
                     .catch((error) => {
                         console.error(error);
                     });
-        })
+            })
             .catch((error) => {
                 console.error(error);
             });
 
     }
 
+    renderRecommend = () => {
+        let self = this;
+        let recommendList = [];
+        let recommend = [];
+        for (let i = 0; i < this.state.data.length; i += 3) {
+            for (let j = 0; j < 3 && i + j < this.state.data.length; j++) {
+                recommend.push(
+                    <View style={{width: '33%', height: 220, padding: 5}}>
+                        <Image source={{uri: this.state.data[i + j].url}}
+                               style={{height: 160, resizeMode: 'contain'}}
+                        />
+                        <Text onPress={() => this.onNavigate(this.state.data[i + j].bookid.id)}>
+                            {this.state.data[i + j].bookid.title}
+                        </Text>
+                        <Text>{this.state.data[i + j].bookid.info}</Text>
+                    </View>
+                );
+            }
+            recommendList.push(
+                <View style={{flex: 1, flexDirection: 'row', height: 220}}>
+                    {recommend}
+                </View>
+            );
+            recommend = [];
+
+        }
+        return <View>{recommendList}</View>;
+    };
+
     render() {
         return (
-            <View style={{width: '100%', flex: 1}}>
+            <ScrollView style={{width: '100%', flex: 1}}>
                 <SearchBar
                     value={this.state.search}
                     placeholder="搜索"
                     onSubmit={this.onSubmit}
                     onCancel={this.clear}
                     onChange={this.onChange}
-                    onFocus={this.onFocus}
+                    // onFocus={this.onFocus}
                     // showCancelButton
                 />
                 {
@@ -177,7 +206,7 @@ export default class HomePage extends Component<Props> {
                         <SearchResult
                             searched={this.state.searched}
                             search={this.state.search}
-                            data={this.state.data}
+                            data={this.state.searchData}
                             onNavigate={this.onNavigate.bind(this)}
                         />
                         :
@@ -185,23 +214,20 @@ export default class HomePage extends Component<Props> {
                             {
                                 this.state.showHistory
                                 &&
-                                <Text style={styles.column}
+                                <Text style={{...styles.column, width: '100%'}}
                                       onPress={() => this.onNavigate(1555942146453)}>
                                     上次阅读&ensp;
-                                    <Text style={{fontSize: 15, flex: 1}}>title</Text>
-                                    <Icon name='close' onPress={this.hideHistory}/>
+                                    <Text style={{fontSize: 15, width: 150}}>目送</Text>
+                                    {/*<Icon name='close' onPress={this.hideHistory}/>*/}
                                 </Text>
                             }
                             <Text style={styles.column}>为你推荐</Text>
-                            <View style={{flex: 1, flexDirection: 'row', textAlign: 'center'}}>
-                                <View style={{flex: 1, height: 100, backgroundColor: '#eee'}}/>
-                                <View style={{flex: 1, height: 100, backgroundColor: '#ddd'}}/>
-                                <View style={{flex: 1, height: 100, backgroundColor: '#eee'}}/>
-                            </View>
-                            <View><Text>测试测试{JSON.stringify(this.state.data)}</Text></View>
+                            {
+                                this.renderRecommend()
+                            }
                         </View>
                 }
-            </View>
+            </ScrollView>
         );
     }
 }
