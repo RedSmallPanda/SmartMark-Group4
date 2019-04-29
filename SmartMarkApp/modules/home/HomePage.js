@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 import {SearchBar} from "@ant-design/react-native";
 import SearchResult from "./SearchResult";
+import MyLogin from "../loginReg/MyLogin";
 
 type Props = {};
 export default class HomePage extends Component<Props> {
@@ -52,6 +53,7 @@ export default class HomePage extends Component<Props> {
     };
 
     render() {
+        // return(<MyLogin/>);
         return (
             <View style={{width: '100%', flex: 1}}>
                 <SearchBar
@@ -63,6 +65,9 @@ export default class HomePage extends Component<Props> {
                     onFocus={this.onFocus}
                     // showCancelButton
                 />
+
+
+
                 {
                     this.state.toSearch ?
                         <SearchResult
